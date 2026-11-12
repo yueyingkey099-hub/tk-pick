@@ -2,74 +2,342 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="240领料台">
-<title>📱 240号机 · 专属领料台</title>
+<title>📱 240号机 · 专属无损领料台</title>
 <style>
-  body { margin:0; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
-         background:#0b1120; color:#f8fafc; font-family:-apple-system,BlinkMacSystemFont,sans-serif; text-align:center; padding:24px; }
-  .spin { width:38px; height:38px; border:4px solid #1e293b; border-top-color:#fe2c55; border-radius:50%;
-          animation:sp 0.75s linear infinite; margin-bottom:16px; }
-  @keyframes sp { to { transform:rotate(360deg); } }
-  .msg { font-size:16px; font-weight:700; margin-bottom:6px; }
-  .sub { font-size:13px; color:#94a3b8; line-height:1.5; }
-  .btn { margin-top:18px; padding:12px 22px; background:#2563eb; color:#fff; border:none; border-radius:12px;
-         font-size:15px; font-weight:700; display:none; cursor:pointer; }
+  :root {
+    --bg: #0b1120; --card: #151f32; --border: #263554;
+    --text: #f8fafc; --muted: #94a3b8;
+    --green: #10b981; --blue: #3b82f6; --amber: #f59e0b; --pink: #fe2c55;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 14px 14px 70px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    background: var(--bg); color: var(--text);
+  }
+  .hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid var(--border); border-radius: 16px;
+    padding: 12px 15px; margin-bottom: 14px;
+  }
+  .hdr-title { font-size: 17px; font-weight: 800; }
+  .hdr-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .hdr-right { display: flex; align-items: center; gap: 8px; }
+  .badge-acct {
+    background: #fe2c55; color: #fff; font-weight: 800;
+    padding: 6px 12px; border-radius: 999px; font-size: 13.5px;
+  }
+  .btn-refresh {
+    background: #1e293b; border: 1px solid #334155; color: #e2e8f0;
+    border-radius: 999px; padding: 6px 11px; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 16px; margin-bottom: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+  }
+  .card.is-done { opacity: 0.72; border-color: #065f46; }
+  .prod-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .prod-name { font-size: 17px; font-weight: 800; line-height: 1.35; }
+  .btn-del {
+    background: transparent; border: 1px solid #334155; color: var(--muted);
+    border-radius: 8px; padding: 4px 8px; font-size: 11.5px; flex-shrink: 0; cursor: pointer;
+  }
+  .prod-meta {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 12px; color: var(--muted);
+  }
+  .tag { background: rgba(59,130,246,0.16); color: #93c5fd; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
+  .tag-green { background: rgba(16,185,129,0.18); color: #6ee7b7; }
+  .step-label {
+    font-size: 12px; font-weight: 700; color: #cbd5e1;
+    margin: 14px 0 7px; display: flex; align-items: center; gap: 6px;
+  }
+  .btn {
+    width: 100%; border: none; border-radius: 14px;
+    padding: 15px 16px; font-size: 16px; font-weight: 800;
+    color: #fff; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none; margin-bottom: 10px;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: linear-gradient(135deg, #fe2c55, #e11d48); box-shadow: 0 4px 16px rgba(254,44,85,0.35); }
+  .btn-blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+  .btn-slate { background: #283548; border: 1px solid #3b4d6b; font-size: 15px; padding: 13px; }
+  .btn-amber { background: linear-gradient(135deg, #d97706, #b45309); font-size: 14px; padding: 12px; }
+  .btn-green { background: linear-gradient(135deg, #059669, #047857); }
+  .btn[disabled] { opacity: 0.55; cursor: wait; }
+  .preload-bar {
+    background: #0f172a; border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 12px; font-size: 12.5px; color: #a7f3d0; margin-bottom: 9px;
+  }
+  .copy-box {
+    background: #0f172a; border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 12px; margin-bottom: 9px;
+  }
+  .copy-hdr { font-size: 11.5px; color: var(--muted); margin-bottom: 4px; }
+  .copy-txt { font-size: 14px; line-height: 1.45; color: #e2e8f0; word-break: break-word; white-space: pre-wrap; }
+  .slides-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .slide-thumb-wrap { background: #0f172a; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-align: center; }
+  .slide-thumb-wrap img { width: 100%; aspect-ratio: 9/16; object-fit: cover; display: block; }
+  .slide-cap { font-size: 11px; color: var(--muted); padding: 4px 0; }
+  .help-tip { font-size: 12px; color: var(--muted); line-height: 1.5; background: rgba(255,255,255,0.04); padding: 9px 11px; border-radius: 10px; margin-top: 6px; }
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    background: #10b981; color: #fff; padding: 11px 20px; border-radius: 999px;
+    font-size: 14px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    display: none; z-index: 999; white-space: nowrap;
+  }
 </style>
 </head>
 <body>
-  <div class="spin" id="sp"></div>
-  <div class="msg" id="msg">⚡ 正在连接 240 号机专属领料台...</div>
-  <div class="sub" id="sub">建议先把本页存为 Safari 标签页或添加到主屏幕（永久固定地址）</div>
-  <button class="btn" id="retryBtn" onclick="go()">🔄 重新连接</button>
-<script>
-const PHONE = "240";
-const GIST_ID = "c21cd7cb2d9b00fd8756b6542d97bcb8";
 
-// Persist token in localStorage on this iPhone so even if Safari strips #hash on bookmarking, it STILL works forever!
+<div class="hdr">
+  <div>
+    <div class="hdr-title">📱 240号机 · 永久领料台</div>
+    <div class="hdr-sub" id="connSub">正在连接电脑总控台...</div>
+  </div>
+  <div class="hdr-right">
+    <button class="btn-refresh" onclick="boot()">🔄 刷新</button>
+    <div class="badge-acct">240</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="card"><div class="prod-name">⚡ 正在同步电脑最新派单队列...</div></div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const ACCT = "240";
+const GIST_ID = "c21cd7cb2d9b00fd8756b6542d97bcb8";
+let BASE_TUNNEL = "";
+let SECRET = "";
+let ITEMS = [];
+const preloadedFiles = {};
+
+function esc(s) {
+  return String(s || "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function getSecret() {
   const h = (location.hash || "").replace(/^#/, "").trim();
   const q = new URLSearchParams(location.search).get("k") || "";
-  const tok = h || q || localStorage.getItem("tk_pick_k") || "";
+  const tok = h || q || localStorage.getItem("tk_pick_k_" + ACCT) || localStorage.getItem("tk_pick_k") || "";
   if (tok) {
-    try { localStorage.setItem("tk_pick_k", tok); } catch(e) {}
+    try {
+      localStorage.setItem("tk_pick_k_" + ACCT, tok);
+      localStorage.setItem("tk_pick_k", tok);
+      if (!location.hash) history.replaceState(null, "", "#" + tok);
+    } catch (e) {}
   }
   return tok;
 }
 
-async function go() {
-  const k = getSecret();
-  const msgEl = document.getElementById("msg");
-  const subEl = document.getElementById("sub");
-  const btn = document.getElementById("retryBtn");
-  const sp = document.getElementById("sp");
-  btn.style.display = "none";
-  sp.style.display = "block";
-  if (!k) {
-    sp.style.display = "none";
-    msgEl.textContent = "🔒 首次绑定缺少密钥";
-    subEl.textContent = "请用 iPhone 相机重新扫一次电脑总控台的永久绑定码";
+function showToast(msg, bg="#10b981") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.background = bg;
+  t.style.display = "block";
+  clearTimeout(window.__toastT);
+  window.__toastT = setTimeout(() => { t.style.display = "none"; }, 2400);
+}
+
+async function copyText(text, label) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      showToast("✅ 已复制 " + label + "！去 TikTok 粘贴");
+      return;
+    }
+  } catch (e) {}
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand("copy"); showToast("✅ 已复制 " + label + "！"); }
+  catch (e) { showToast("⚠️ 请长按文本手动复制", "#f59e0b"); }
+  document.body.removeChild(ta);
+}
+
+async function preloadItemSlides(item, idx) {
+  const statusEl = document.getElementById(`preload-status-${idx}`);
+  const saveBtn = document.getElementById(`save-btn-${idx}`);
+  if (!statusEl || !saveBtn) return;
+  const files = [];
+  try {
+    for (let i = 0; i < item.slide_names.length; i++) {
+      const sname = item.slide_names[i];
+      statusEl.textContent = `⚡ 正在预加载无损原图 (${i+1}/${item.slide_names.length})...`;
+      const url = `${BASE_TUNNEL}/raw/${encodeURIComponent(item.pid)}/${encodeURIComponent(item.variant_id)}/${encodeURIComponent(sname)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`;
+      const resp = await fetch(url, { cache: "no-store" });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      const blob = await resp.blob();
+      files.push(new File([blob], `${item.pid}_${item.variant_id}_${String(i+1).padStart(2,"0")}.jpg`, { type: "image/jpeg" }));
+    }
+    preloadedFiles[idx] = files;
+    statusEl.textContent = `✅ ${files.length} 张 1080×1920 无损原图已就绪`;
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = `📥 一键存全套 ${files.length} 张图到系统相册`;
+  } catch (err) {
+    statusEl.textContent = `⚠️ 预加载中断 (${err.message})，可点此重试或长按单图保存`;
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = `🔄 点击重试加载整套原图`;
+  }
+}
+
+async function saveAllSlides(idx) {
+  const item = ITEMS[idx];
+  const files = preloadedFiles[idx];
+  if (!files || !files.length) {
+    await preloadItemSlides(item, idx);
+    return;
+  }
+  if (navigator.canShare && navigator.canShare({ files })) {
+    try {
+      await navigator.share({ files });
+      showToast("🎉 在弹出菜单点「存储 " + files.length + " 张图像」即全进相册！");
+      return;
+    } catch (err) {
+      if (err && err.name === "AbortError") return;
+    }
+  }
+  showToast("💡 请长按下方 P1~P" + files.length + " 缩略图逐张存相册", "#f59e0b");
+}
+
+async function reportAction(idx, action) {
+  const item = ITEMS[idx];
+  try {
+    const resp = await fetch(`${BASE_TUNNEL}/api/mark?k=${encodeURIComponent(SECRET)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ account_key: ACCT, pid: item.pid, variant_id: item.variant_id, action })
+    });
+    const res = await resp.json();
+    if (res.ok) {
+      if (action === "dismiss") {
+        showToast("🗑️ 已移出待领队列");
+        boot();
+      } else if (action === "publish") {
+        showToast("✅ 已同步回电脑总控台！");
+        boot();
+      } else {
+        showToast("✅ 已记录加橱窗！");
+      }
+    }
+  } catch (e) {
+    showToast("⚠️ 网络波动，稍后再试", "#ef4444");
+  }
+}
+
+function renderItems() {
+  const root = document.getElementById("app");
+  if (!ITEMS.length) {
+    root.innerHTML = `<div class="card">
+      <div class="prod-name">🎉 当前 ${esc(ACCT)} 号机暂无待领套图</div>
+      <div class="help-tip" style="margin-top:10px;">在电脑 <code>8788</code> 总控台任意商品行点击 <b>「📱 派${esc(ACCT)}」</b>，再点右上角「🔄 刷新」即可秒领！</div>
+    </div>`;
+    return;
+  }
+  root.innerHTML = ITEMS.map((it, idx) => {
+    const tspBtn = (it.tsp && it.tsp.share_url)
+      ? `<a class="btn btn-amber" href="${esc(it.tsp.share_url)}" target="_blank" onclick="reportAction(${idx}, 'cart')">
+           💎 未挂车点此：直跳 TSP 高佣加橱窗 (${esc(it.tsp.partner_commission)}%+${esc(it.tsp.creator_commission)}%)
+         </a>`
+      : "";
+    const thumbs = it.slide_names.map((sn, sIdx) => {
+      const rawUrl = `${BASE_TUNNEL}/raw/${encodeURIComponent(it.pid)}/${encodeURIComponent(it.variant_id)}/${encodeURIComponent(sn)}?k=${encodeURIComponent(SECRET)}`;
+      return `<div class="slide-thumb-wrap">
+        <img src="${rawUrl}" alt="P${sIdx+1}">
+        <div class="slide-cap">P${sIdx+1} (${it.slide_sizes_kb[sIdx]}KB)</div>
+      </div>`;
+    }).join("");
+
+    return `<div class="card ${it.published ? 'is-done' : ''}">
+      <div class="prod-top">
+        <div class="prod-name">${esc(it.cn_name)}</div>
+        <button class="btn-del" onclick="reportAction(${idx}, 'dismiss')">移出列表 ×</button>
+      </div>
+      <div class="prod-meta">
+        <span class="tag">PID: ${esc(it.pid)}</span>
+        <span class="tag tag-green">${esc(it.variant_id.toUpperCase())} (${it.slide_names.length}张)</span>
+        ${it.queued_at ? `<span class="tag">派单 ${esc(it.queued_at)}</span>` : ''}
+        ${it.published ? `<span class="tag tag-green">✅ 本号已登记发帖</span>` : ''}
+      </div>
+
+      ${tspBtn ? `<div class="step-label">🛒 橱窗挂车（若尚未加橱窗）</div>${tspBtn}` : ''}
+
+      <div class="step-label">📸 第一步：存无损原图进系统相册</div>
+      <div class="preload-bar" id="preload-status-${idx}">⏳ 准备加载原图...</div>
+      <button id="save-btn-${idx}" class="btn btn-primary" disabled onclick="saveAllSlides(${idx})">⏳ 正在预加载原图...</button>
+      <div class="help-tip">点上方红按钮 → 弹出菜单点 <b>「存储 ${it.slide_names.length} 张图像」</b> 按顺序一次全进相册（也可长按下方单图存）</div>
+      <div class="slides-strip">${thumbs}</div>
+
+      <div class="step-label">📋 第二步：复制标题与正文</div>
+      <div class="copy-box">
+        <div class="copy-hdr">📌 Title（标题）</div>
+        <div class="copy-txt">${esc(it.title || '(无标题)')}</div>
+      </div>
+      <button class="btn btn-blue" onclick="copyText(ITEMS[${idx}].title, 'Title 标题')">📋 一键复制 Title 标题</button>
+
+      <div class="copy-box">
+        <div class="copy-hdr">📝 Caption（正文 + 标签）</div>
+        <div class="copy-txt">${esc(it.caption || '(零正文)')}</div>
+      </div>
+      <button class="btn btn-slate" onclick="copyText(ITEMS[${idx}].caption, 'Caption 正文')">📋 一键复制 Caption 正文</button>
+
+      <div class="help-tip" style="margin-bottom:12px;">🎵 <b>防静音铁律</b>：进 TikTok 选好图后，<b>先挂橙色小黄车，最后再去顶部搜商用音乐</b>。</div>
+
+      <button class="btn btn-green" onclick="reportAction(${idx}, 'publish')">
+        ${it.published ? '✅ 已登记发帖（电脑总控台已同步）' : '✅ 我已在手机发完帖（同步回电脑工作台）'}
+      </button>
+    </div>`;
+  }).join("");
+
+  ITEMS.forEach((it, idx) => preloadItemSlides(it, idx));
+}
+
+async function boot() {
+  SECRET = getSecret();
+  const sub = document.getElementById("connSub");
+  const root = document.getElementById("app");
+  if (!SECRET) {
+    sub.textContent = "缺少绑定密钥";
+    root.innerHTML = `<div class="card"><div class="prod-name">🔒 请用 iPhone 原生相机扫一次电脑上的绑定二维码（扫一次永久生效）</div></div>`;
     return;
   }
   try {
-    const r = await fetch("https://api.github.com/gists/" + GIST_ID + "?t=" + Date.now(), { cache: "no-store" });
-    if (!r.ok) throw new Error("Gist HTTP " + r.status);
-    const data = await r.json();
-    const content = data.files["pickup_tunnel.json"].content;
-    const parsed = JSON.parse(content);
-    const base = (parsed.tunnel_url || "").replace(/\/+$/, "");
-    if (!base) throw new Error("电脑端隧道尚未启动");
-    const target = base + "/p/" + encodeURIComponent(PHONE) + "?k=" + encodeURIComponent(k) + "&entry=" + encodeURIComponent(location.href.split("#")[0]);
-    location.replace(target);
+    sub.textContent = "正在定位电脑安全隧道...";
+    const gResp = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`, { cache: "no-store" });
+    if (!gResp.ok) throw new Error("Gist HTTP " + gResp.status);
+    const gData = await gResp.json();
+    const parsed = JSON.parse(gData.files["pickup_tunnel.json"].content);
+    BASE_TUNNEL = (parsed.tunnel_url || "").replace(/\/+$/, "");
+    if (!BASE_TUNNEL) throw new Error("电脑隧道未启动");
+
+    const qResp = await fetch(`${BASE_TUNNEL}/api/queue/${encodeURIComponent(ACCT)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`, { cache: "no-store" });
+    if (!qResp.ok) throw new Error("电脑服务未响应 (" + qResp.status + ")");
+    const qData = await qResp.json();
+    ITEMS = qData.items || [];
+    sub.textContent = `🟢 已连上电脑总控台 · 待领 ${ITEMS.filter(x=>!x.published).length} 套 (${qData.server_time || ''})`;
+    renderItems();
   } catch (err) {
-    sp.style.display = "none";
-    msgEl.textContent = "⚠️ 电脑总控台隧道暂未在线";
-    subEl.textContent = "请确认电脑已打开 start_workbench.bat (" + err.message + ")";
-    btn.style.display = "inline-block";
+    sub.textContent = "🔴 电脑总控台未在线";
+    root.innerHTML = `<div class="card">
+      <div class="prod-name">⚠️ 暂未连上电脑领料服务</div>
+      <div class="help-tip" style="margin-top:8px;">请确认电脑已打开 <code>start_workbench.bat</code>，然后点右上角「🔄 刷新」。(${esc(err.message)})</div>
+    </div>`;
   }
 }
-go();
+
+boot();
 </script>
 </body>
 </html>
