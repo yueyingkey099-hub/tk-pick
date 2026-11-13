@@ -247,23 +247,13 @@ function renderItems() {
     return;
   }
   root.innerHTML = ITEMS.map((it, idx) => {
-    const fallbackDeeplink = it.showcase_deeplink || (`snssdk1180://lynxview?` + new URLSearchParams({
-      bundle: 'url-add-product/template.js',
-      channel: 'tea_selection_page',
-      dynamic: '1',
-      hide_nav_bar: '1',
-      product_url: `https://shop.tiktok.com/view/product/${it.pid}?region=US&local=en`,
-      status_bar_color: '00000000',
-      surl: 'https://lf16-gecko-source.tiktokcdn.com/obj/byte-gurd-source-sg/8/gecko/resource/tea_selection_page/url-add-product/template.js',
-      trans_status_bar: '1',
-      use_bdx: '1',
-      use_gecko_first: '1'
-    }).toString());
-    const tspBtn = (it.tsp && it.tsp.share_url)
+    const fallbackUrl = (it.tsp && it.tsp.share_url) ? it.tsp.share_url : (`${BASE_TUNNEL}/go_showcase/${encodeURIComponent(it.pid)}`);
+    const isRealTsp = !!(it.tsp && it.tsp.share_url && it.tsp.is_tsp !== false);
+    const tspBtn = isRealTsp
       ? `<a class="btn btn-amber" href="${esc(it.tsp.share_url)}" target="_blank" onclick="reportAction(${idx}, 'cart')">
            💎 未挂车点此：直跳 TSP 高佣加橱窗 (${esc(it.tsp.partner_commission)}%+${esc(it.tsp.creator_commission)}%)
          </a>`
-      : `<a class="btn btn-amber" href="${esc(fallbackDeeplink)}" onclick="reportAction(${idx}, 'cart')">
+      : `<a class="btn btn-amber" href="${esc(fallbackUrl)}" target="_blank" onclick="reportAction(${idx}, 'cart')">
            🛒 未挂车点此：直跳 TikTok 达人加橱窗 (非TSP公开计划)
          </a>`;
     const thumbs = it.slide_names.map((sn, sIdx) => {
