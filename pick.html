@@ -126,6 +126,7 @@
 const GIST_ID = "c21cd7cb2d9b00fd8756b6542d97bcb8";
 let ACCT = "";
 let BASE_TUNNEL = "";
+let OVERRIDE_TUNNEL = "";
 let SECRET = "";
 let ITEMS = [];
 const preloadedFiles = {};
@@ -140,6 +141,7 @@ function sanitizeAcct(raw) {
 
 function resolveIdentity() {
   const sp = new URLSearchParams(location.search);
+  OVERRIDE_TUNNEL = (sp.get("tunnel") || "").trim().replace(/\/+$/, "");
   const rawHash = (location.hash || "").replace(/^#/, "").trim();
   let hashAcct = "";
   let hashTok = rawHash;
@@ -392,6 +394,35 @@ function itemVariant(it) {
   return it.variant_id || "v1";
 }
 
+async function resolveTunnelUrl() {
+  const sp = new URLSearchParams(location.search);
+  const overrideUrl = OVERRIDE_TUNNEL || (sp.get("tunnel") || "").trim().replace(/\/+$/, "");
+  if (overrideUrl) return overrideUrl;
+
+  let lastErr = "Gist lookup failed";
+  try {
+    const gResp = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`, { cache: "no-store" });
+    if (gResp.ok) {
+      const gData = await gResp.json();
+      const parsed = JSON.parse(gData.files["pickup_tunnel.json"].content);
+      const url = (parsed.tunnel_url || "").replace(/\/+$/, "");
+      if (url) return url;
+    } else {
+      lastErr = "Gist HTTP " + gResp.status;
+    }
+  } catch (e) {
+    lastErr = e.message || String(e);
+  }
+
+  // Fallback to raw gist URL to bypass GitHub REST API 403 rate limits on shared IPs
+  const rawResp = await fetch(`https://gist.githubusercontent.com/yueyingkey099-hub/${GIST_ID}/raw/pickup_tunnel.json?t=${Date.now()}`, { cache: "no-store" });
+  if (!rawResp.ok) throw new Error(`${lastErr} / Raw HTTP ${rawResp.status}`);
+  const rawParsed = await rawResp.json();
+  const rawUrl = (rawParsed.tunnel_url || "").replace(/\/+$/, "");
+  if (!rawUrl) throw new Error("电脑隧道未启动");
+  return rawUrl;
+}
+
 async function boot() {
   resolveIdentity();
   const sub = document.getElementById("connSub");
@@ -413,11 +444,7 @@ async function boot() {
   }
   try {
     sub.textContent = "正在定位电脑安全隧道...";
-    const gResp = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`, { cache: "no-store" });
-    if (!gResp.ok) throw new Error("Gist HTTP " + gResp.status);
-    const gData = await gResp.json();
-    const parsed = JSON.parse(gData.files["pickup_tunnel.json"].content);
-    BASE_TUNNEL = (parsed.tunnel_url || "").replace(/\/+$/, "");
+    BASE_TUNNEL = await resolveTunnelUrl();
     if (!BASE_TUNNEL) throw new Error("电脑隧道未启动");
 
     const qResp = await fetch(`${BASE_TUNNEL}/api/queue/${encodeURIComponent(ACCT)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`, { cache: "no-store" });
