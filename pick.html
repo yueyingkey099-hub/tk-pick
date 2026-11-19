@@ -102,6 +102,31 @@
     font-size: 14px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     display: none; z-index: 999; white-space: nowrap;
   }
+  .self-drawer {
+    border-color: rgba(254,44,85,0.45);
+    background: linear-gradient(160deg, #172136, #10192b);
+    padding: 14px 15px;
+    margin-bottom: 14px;
+  }
+  .self-hdr { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+  .self-title { font-size: 15px; font-weight: 800; color: #f8fafc; }
+  .self-close {
+    background: transparent; border: 1px solid #334155; color: var(--muted);
+    border-radius: 8px; padding: 3px 9px; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .self-hint { font-size: 12px; color: var(--muted); line-height: 1.45; margin-bottom: 8px; }
+  .self-textarea {
+    width: 100%; padding: 11px 12px; border-radius: 12px; border: 1px solid #334155;
+    background: #0b1120; color: #f8fafc; font-size: 16px; font-family: inherit;
+    line-height: 1.4; resize: vertical; outline: none; margin-bottom: 10px;
+  }
+  .self-textarea:focus { border-color: #fe2c55; }
+  .self-status {
+    background: #0b1120; border: 1px solid #263554; border-radius: 12px;
+    padding: 10px 12px; font-size: 12.5px; line-height: 1.5; color: #e2e8f0;
+  }
+  .self-warn { color: #fbbf24; margin-top: 5px; font-weight: 600; }
+  .self-fail { color: #fca5a5; margin-top: 5px; }
 </style>
 </head>
 <body>
@@ -112,9 +137,21 @@
     <div class="hdr-sub" id="connSub">正在连接电脑总控台...</div>
   </div>
   <div class="hdr-right">
+    <button class="btn-refresh" id="btnToggleSelf" onclick="toggleSelfDrawer()">➕ 自选品</button>
     <button class="btn-refresh" onclick="boot()">🔄 刷新</button>
     <div class="badge-acct" id="badgeAcct">--</div>
   </div>
+</div>
+
+<div id="selfSubmitDrawer" class="card self-drawer" style="display:none;">
+  <div class="self-hdr">
+    <div class="self-title">✨ 自选品 · 自动拿TSP高佣码并出图置顶</div>
+    <button class="self-close" onclick="toggleSelfDrawer(false)">×</button>
+  </div>
+  <div class="self-hint">粘贴 1–5 个商品 ID 或 TikTok 商品链接（换行/空格分隔），自动生高佣码并生成 1 套 3 页图文置顶到本号第 1 条</div>
+  <textarea id="selfPidInput" class="self-textarea" rows="2" placeholder="例如：1732442313249624794 或直接粘 TikTok 商品链接"></textarea>
+  <button id="selfSubmitBtn" class="btn btn-primary" style="padding:12px 14px; font-size:15px; margin-bottom:8px;" onclick="submitSelfPids()">🚀 自动生码出图并置顶待发</button>
+  <div id="selfTaskBox" class="self-status" style="display:none;"></div>
 </div>
 
 <div id="app">
@@ -137,6 +174,156 @@ let preloadQueue = [];
 const preloadQueuedKeys = new Set();
 let activePreloads = 0;
 const MAX_PRELOAD_CONC = 2;
+let selfPollTimer = null;
+let selfActiveTaskId = "";
+
+function toggleSelfDrawer(forceOpen) {
+  const drawer = document.getElementById("selfSubmitDrawer");
+  if (!drawer) return;
+  const open = (typeof forceOpen === "boolean") ? forceOpen : (drawer.style.display === "none");
+  drawer.style.display = open ? "block" : "none";
+  if (open) {
+    const inp = document.getElementById("selfPidInput");
+    if (inp) setTimeout(() => inp.focus(), 60);
+  }
+}
+
+function prependSelfItems(newItems) {
+  if (!Array.isArray(newItems) || !newItems.length) return 0;
+  const existingKeys = new Set(ITEMS.map(itemKey));
+  const fresh = newItems.filter(it => it && !existingKeys.has(itemKey(it)));
+  if (!fresh.length) return 0;
+
+  if (!ITEMS.length) {
+    ITEMS = fresh;
+    updateConnSub();
+    renderItems();
+    return fresh.length;
+  }
+
+  ITEMS = fresh.concat(ITEMS);
+  const root = document.getElementById("app");
+  if (root) {
+    root.insertAdjacentHTML("afterbegin", fresh.map(renderCardHtml).join(""));
+    for (const it of fresh) {
+      schedulePreload(itemKey(it));
+    }
+  }
+  updateConnSub();
+  return fresh.length;
+}
+
+function renderSelfTaskStatus(task) {
+  const box = document.getElementById("selfTaskBox");
+  if (!box || !task) return;
+  box.style.display = "block";
+  const warnsHtml = (task.warnings || []).map(w => `<div class="self-warn">${esc(w)}</div>`).join("");
+  const fails = (task.failed || []).concat(task.skipped_initial || []);
+  const failsHtml = fails.length
+    ? fails.map(f => `<div class="self-fail">⚠️ ${esc(f.pid || '')}: ${esc(f.reason || '失败')}</div>`).join("")
+    : "";
+  const genList = task.generated || [];
+  const genHtml = genList.length
+    ? `<div style="color:#6ee7b7; margin-top:5px;">📦 已置顶待发: ${genList.map(g => `${esc(g.pid)}(${esc((g.variant_id || 'v1').toUpperCase())}${g.has_tsp ? '·💎高佣' : '·公开佣'})`).join("、")}</div>`
+    : "";
+  box.innerHTML = `<div style="font-weight:700;">${esc(task.stage_label || task.status || "处理中...")}</div>${genHtml}${warnsHtml}${failsHtml}`;
+}
+
+function stopSelfPolling() {
+  if (selfPollTimer) {
+    clearTimeout(selfPollTimer);
+    selfPollTimer = null;
+  }
+}
+
+async function pollSelfTask(taskId) {
+  stopSelfPolling();
+  if (!taskId || !BASE_TUNNEL || !SECRET) return;
+  selfActiveTaskId = taskId;
+  const btn = document.getElementById("selfSubmitBtn");
+  try {
+    const resp = await fetch(`${BASE_TUNNEL}/api/self_task/${encodeURIComponent(taskId)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`, { cache: "no-store" });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok || !data.task) {
+      throw new Error(data.error || ("HTTP " + resp.status));
+    }
+    const t = data.task;
+    renderSelfTaskStatus(t);
+    const active = ["queued", "checking_tsp", "generating_tsp", "rendering"].includes(t.status);
+    if (active) {
+      if (btn) btn.disabled = true;
+      selfPollTimer = setTimeout(() => pollSelfTask(taskId), 2500);
+      return;
+    }
+    if (btn) btn.disabled = false;
+    selfActiveTaskId = "";
+    const added = prependSelfItems(t.new_items || []);
+    if (added > 0) {
+      showToast(`🎉 自选 ${added} 套图文已生成并置顶第 1 条！`);
+    } else if (t.status === "error") {
+      showToast(t.stage_label || "❌ 自选出图失败", "#ef4444");
+    }
+  } catch (err) {
+    if (btn) btn.disabled = false;
+    selfPollTimer = setTimeout(() => pollSelfTask(taskId), 4000);
+  }
+}
+
+async function submitSelfPids() {
+  if (!ACCT || !SECRET || !BASE_TUNNEL) {
+    showToast("⚠️ 请先连上电脑总控台再提交", "#f59e0b");
+    return;
+  }
+  const inp = document.getElementById("selfPidInput");
+  const rawText = (inp ? inp.value : "").trim();
+  if (!rawText) {
+    showToast("⚠️ 请粘贴商品 ID 或 TikTok 商品链接", "#f59e0b");
+    return;
+  }
+  const btn = document.getElementById("selfSubmitBtn");
+  if (btn) btn.disabled = true;
+  try {
+    const resp = await fetch(`${BASE_TUNNEL}/api/self_submit?k=${encodeURIComponent(SECRET)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ account_key: ACCT, raw_text: rawText })
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok || !data.task) {
+      if (btn) btn.disabled = false;
+      const box = document.getElementById("selfTaskBox");
+      if (box) {
+        box.style.display = "block";
+        box.innerHTML = `<div class="self-fail">⚠️ ${esc(data.error || ("提交失败 HTTP " + resp.status))}</div>`;
+      }
+      showToast("⚠️ " + (data.error || "提交失败"), "#ef4444");
+      return;
+    }
+    if (inp) inp.value = "";
+    renderSelfTaskStatus(data.task);
+    showToast("⏳ 已提交，正在自动生码出图...");
+    pollSelfTask(data.task.task_id);
+  } catch (err) {
+    if (btn) btn.disabled = false;
+    showToast("⚠️ 网络波动，请稍后重试", "#ef4444");
+  }
+}
+
+async function resumeActiveSelfTasks() {
+  if (!ACCT || !SECRET || !BASE_TUNNEL) return;
+  try {
+    const resp = await fetch(`${BASE_TUNNEL}/api/self_tasks/${encodeURIComponent(ACCT)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`, { cache: "no-store" });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const list = (data && data.tasks) || [];
+    const activeTask = list.find(t => ["queued", "checking_tsp", "generating_tsp", "rendering"].includes(t.status));
+    if (activeTask) {
+      toggleSelfDrawer(true);
+      renderSelfTaskStatus(activeTask);
+      pollSelfTask(activeTask.task_id);
+    }
+  } catch (e) {}
+}
 
 function itemVariant(it) {
   return (it && it.variant_id) ? it.variant_id : "v1";
@@ -678,6 +865,7 @@ async function boot() {
     if (Number(qData.refilled_count || 0) > 0) {
       showToast(`⚡ 队列不足，已自动补货 +${qData.refilled_count} 套！`);
     }
+    resumeActiveSelfTasks();
   } catch (err) {
     sub.textContent = "🔴 电脑总控台未在线";
     root.innerHTML = `<div class="card">
