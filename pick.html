@@ -282,13 +282,13 @@
     <div id="panelHookPool">
       <div id="hookPoolSelectedBar" class="hook-selected-bar">
         <div class="hook-sel-left">
-          <div class="hook-sel-text">🎲 当前首图：智能随机（28族爆款轮换）</div>
+          <div class="hook-sel-text">🎲 当前首图：智能随机（23张无字底图轮换）</div>
         </div>
       </div>
       <div class="hook-subfilter">
-        <button type="button" class="hook-pill active" data-hook-filter="all" onclick="setHookPoolFilter('all')">全部(50)</button>
-        <button type="button" class="hook-pill" data-hook-filter="static" onclick="setHookPoolFilter('static')">🔥 静图钩子(40)</button>
-        <button type="button" class="hook-pill" data-hook-filter="dynamic" onclick="setHookPoolFilter('dynamic')">✨ 动态模板(10)</button>
+        <button type="button" class="hook-pill active" data-hook-filter="all" onclick="setHookPoolFilter('all')">全部(33)</button>
+        <button type="button" class="hook-pill" data-hook-filter="static" onclick="setHookPoolFilter('static')">🔥 无字静图(23)</button>
+        <button type="button" class="hook-pill" data-hook-filter="dynamic" onclick="setHookPoolFilter('dynamic')">✨ 带字动态模板(10)</button>
         <button type="button" id="btnExpandHookGrid" class="hook-mini-btn" style="margin-left:auto;" onclick="toggleHookGridExpand()">⤢ 展开看全部</button>
         <button type="button" class="hook-mini-btn" onclick="loadHookPool(true)">🔄 刷新池</button>
       </div>
@@ -378,7 +378,7 @@ function formatViewsShort(n) {
 
 function hookThumbUrl(hookId, full = false) {
   if (!BASE_TUNNEL || !SECRET || !hookId) return "";
-  return `${BASE_TUNNEL}/api/hook_thumb/${encodeURIComponent(hookId)}?k=${encodeURIComponent(SECRET)}${full ? "&full=1" : ""}`;
+  return `${BASE_TUNNEL}/api/hook_thumb/${encodeURIComponent(hookId)}?k=${encodeURIComponent(SECRET)}${full ? "&full=1" : ""}&v=clean2`;
 }
 
 function findHookInfoById(hookId) {
@@ -446,7 +446,7 @@ function renderHookSelectedBar() {
   if (!bar) return;
   if (!selectedPoolHookId) {
     bar.innerHTML = `<div class="hook-sel-left">
-      <div class="hook-sel-text">🎲 当前首图：智能随机（28族爆款轮换）</div>
+      <div class="hook-sel-text">🎲 当前首图：智能随机（23张无字底图轮换）</div>
     </div>`;
     return;
   }
@@ -455,7 +455,7 @@ function renderHookSelectedBar() {
     ? (info.kind === "dynamic" ? `✨ ${info.item.title}` : `🔥 ${info.item.label}`)
     : selectedPoolHookId;
   const subTxt = info
-    ? (info.kind === "dynamic" ? info.item.subtitle : `复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · 自动4D去重`)
+    ? (info.kind === "dynamic" ? info.item.subtitle : `复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · 纯净无字底图(可在TikTok加字)`)
     : "已固定第1张首图";
   const thumb = hookThumbUrl(selectedPoolHookId, false);
   const idJs = esc(escJs(selectedPoolHookId));
@@ -492,8 +492,8 @@ function renderHookPoolGrid() {
   const stBtn = document.querySelector('.hook-pill[data-hook-filter="static"]');
   const dyBtn = document.querySelector('.hook-pill[data-hook-filter="dynamic"]');
   if (allBtn) allBtn.textContent = `全部(${statics.length + dynamics.length})`;
-  if (stBtn) stBtn.textContent = `🔥 静图钩子(${statics.length})`;
-  if (dyBtn) dyBtn.textContent = `✨ 动态模板(${dynamics.length})`;
+  if (stBtn) stBtn.textContent = `🔥 无字静图(${statics.length})`;
+  if (dyBtn) dyBtn.textContent = `✨ 带字动态模板(${dynamics.length})`;
 
   const tiles = [];
   if (selfHookFilter === "all") {
@@ -502,8 +502,8 @@ function renderHookPoolGrid() {
       ${isAutoSel ? '<div class="hook-check-badge">✓ 已选</div>' : ''}
       <div class="hook-tile-auto">
         <div style="font-size:24px;">🎲</div>
-        <div style="font-size:12px; font-weight:800; color:#f8fafc;">智能随机</div>
-        <div style="font-size:10px; color:#94a3b8; line-height:1.3;">28个爆款视觉家族自动轮换不重样</div>
+        <div style="font-size:12px; font-weight:800; color:#f8fafc;">智能随机(无字底图)</div>
+        <div style="font-size:10px; color:#94a3b8; line-height:1.3;">23张去字爆款底图轮换，可在TikTok自由加字</div>
       </div>
       <div class="hook-tile-cap">
         <div class="hook-tile-title">默认推荐</div>
@@ -592,7 +592,7 @@ async function loadHookPool(forceRefresh = false) {
     HOOK_POOL_DATA = data;
     const stCnt = (data.static_hooks || []).length;
     const dyCnt = (data.dynamic_hooks || []).length;
-    if (hint) hint.textContent = `${stCnt}张静图 + ${dyCnt}套动态 (${data.family_count || 28}家族)`;
+    if (hint) hint.textContent = `${stCnt}张无字静图 + ${dyCnt}套带字动态 (${data.family_count || 23}类)`;
     renderHookSelectedBar();
     renderHookPoolGrid();
     renderRecentUploads();
