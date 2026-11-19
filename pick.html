@@ -128,8 +128,40 @@ let ACCT = "";
 let BASE_TUNNEL = "";
 let OVERRIDE_TUNNEL = "";
 let SECRET = "";
+let LAST_SERVER_TIME = "";
 let ITEMS = [];
 const preloadedFiles = {};
+const preloadPromises = {};
+let preloadObserver = null;
+let preloadQueue = [];
+const preloadQueuedKeys = new Set();
+let activePreloads = 0;
+const MAX_PRELOAD_CONC = 2;
+
+function itemVariant(it) {
+  return (it && it.variant_id) ? it.variant_id : "v1";
+}
+function itemKey(it) {
+  return `${it.pid}:${itemVariant(it)}`;
+}
+function domIdOfKey(key) {
+  return String(key || "").replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+function getItemByKey(key) {
+  return ITEMS.find(x => itemKey(x) === key);
+}
+function escJs(str) {
+  return String(str || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
+function clearObjectProps(obj) {
+  Object.keys(obj).forEach(k => delete obj[k]);
+}
+function updateConnSub() {
+  const sub = document.getElementById("connSub");
+  if (!sub) return;
+  const pending = ITEMS.filter(x => !x.published).length;
+  sub.textContent = `🟢 已连上电脑总控台 · 待领 ${pending} 套${LAST_SERVER_TIME ? ` (${LAST_SERVER_TIME})` : ''}`;
+}
 
 function esc(s) {
   return String(s || "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -243,53 +275,107 @@ async function copyText(text, label) {
   document.body.removeChild(ta);
 }
 
-async function preloadItemSlides(item, idx) {
-  const statusEl = document.getElementById(`preload-status-${idx}`);
-  const saveBtn = document.getElementById(`save-btn-${idx}`);
-  if (!statusEl || !saveBtn) return;
-  const files = [];
-  try {
-    for (let i = 0; i < item.slide_names.length; i++) {
-      const sname = item.slide_names[i];
-      statusEl.textContent = `⚡ 正在预加载无损原图 (${i+1}/${item.slide_names.length})...`;
-      const url = `${BASE_TUNNEL}/raw/${encodeURIComponent(item.pid)}/${encodeURIComponent(item.variant_id)}/${encodeURIComponent(sname)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`;
-      const resp = await fetch(url, { cache: "no-store" });
-      if (!resp.ok) throw new Error("HTTP " + resp.status);
-      const blob = await resp.blob();
-      files.push(new File([blob], `${item.pid}_${item.variant_id}_${String(i+1).padStart(2,"0")}.jpg`, { type: "image/jpeg" }));
+function copyItemField(key, field, label) {
+  const item = getItemByKey(key);
+  if (!item) return;
+  copyText(item[field] || "", label);
+}
+
+function preloadItemSlides(item) {
+  if (!item) return Promise.resolve([]);
+  const key = itemKey(item);
+  if (preloadedFiles[key] && preloadedFiles[key].length) {
+    return Promise.resolve(preloadedFiles[key]);
+  }
+  if (preloadPromises[key]) {
+    return preloadPromises[key];
+  }
+  const domId = domIdOfKey(key);
+  const p = (async () => {
+    const statusEl = document.getElementById(`preload-status-${domId}`);
+    const saveBtn = document.getElementById(`save-btn-${domId}`);
+    const files = [];
+    try {
+      for (let i = 0; i < item.slide_names.length; i++) {
+        const sname = item.slide_names[i];
+        if (statusEl) {
+          statusEl.textContent = `⚡ 正在预加载无损原图 (${i+1}/${item.slide_names.length})...`;
+        }
+        const url = `${BASE_TUNNEL}/raw/${encodeURIComponent(item.pid)}/${encodeURIComponent(itemVariant(item))}/${encodeURIComponent(sname)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`;
+        const resp = await fetch(url, { cache: "no-store" });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const blob = await resp.blob();
+        files.push(new File([blob], `${item.pid}_${itemVariant(item)}_${String(i+1).padStart(2,"0")}.jpg`, { type: "image/jpeg" }));
+      }
+      if (!getItemByKey(key)) return [];
+      preloadedFiles[key] = files;
+      const curStatusEl = document.getElementById(`preload-status-${domId}`);
+      const curSaveBtn = document.getElementById(`save-btn-${domId}`);
+      if (curStatusEl) curStatusEl.textContent = `✅ ${files.length} 张无损高清原图已就绪`;
+      if (curSaveBtn) curSaveBtn.innerHTML = `📥 一键存全套 ${files.length} 张图到系统相册`;
+      return files;
+    } catch (err) {
+      const curStatusEl = document.getElementById(`preload-status-${domId}`);
+      const curSaveBtn = document.getElementById(`save-btn-${domId}`);
+      if (curStatusEl) curStatusEl.textContent = `⚠️ 预加载中断 (${err.message})，可点下方重试或长按单图保存`;
+      if (curSaveBtn) curSaveBtn.innerHTML = `🔄 点击重试加载整套原图`;
+      return [];
+    } finally {
+      delete preloadPromises[key];
     }
-    preloadedFiles[idx] = files;
-    statusEl.textContent = `✅ ${files.length} 张无损高清原图已就绪`;
-    saveBtn.disabled = false;
-    saveBtn.innerHTML = `📥 一键存全套 ${files.length} 张图到系统相册`;
-  } catch (err) {
-    statusEl.textContent = `⚠️ 预加载中断 (${err.message})，可点此重试或长按单图保存`;
-    saveBtn.disabled = false;
-    saveBtn.innerHTML = `🔄 点击重试加载整套原图`;
+  })();
+  preloadPromises[key] = p;
+  return p;
+}
+
+function schedulePreload(key) {
+  if (!key || preloadedFiles[key] || preloadQueuedKeys.has(key)) return;
+  if (!getItemByKey(key)) return;
+  preloadQueuedKeys.add(key);
+  preloadQueue.push(key);
+  drainPreloadQueue();
+}
+
+function drainPreloadQueue() {
+  while (activePreloads < MAX_PRELOAD_CONC && preloadQueue.length > 0) {
+    const nextKey = preloadQueue.shift();
+    preloadQueuedKeys.delete(nextKey);
+    const item = getItemByKey(nextKey);
+    if (!item || preloadedFiles[nextKey]) continue;
+    activePreloads++;
+    preloadItemSlides(item).finally(() => {
+      activePreloads = Math.max(0, activePreloads - 1);
+      drainPreloadQueue();
+    });
   }
 }
 
-async function saveAllSlides(idx) {
-  const item = ITEMS[idx];
-  const files = preloadedFiles[idx];
-  if (!files || !files.length) {
-    await preloadItemSlides(item, idx);
+async function saveAllSlides(key) {
+  const item = getItemByKey(key);
+  if (!item) return;
+  const files = preloadedFiles[key];
+  if (files && files.length) {
+    if (navigator.canShare && navigator.canShare({ files })) {
+      try {
+        await navigator.share({ files });
+        showToast("🎉 在弹出菜单点「存储 " + files.length + " 张图像」即全进相册！");
+        return;
+      } catch (err) {
+        if (err && err.name === "AbortError") return;
+      }
+    }
+    showToast("💡 请长按下方 P1~P" + files.length + " 缩略图逐张存相册", "#f59e0b");
     return;
   }
-  if (navigator.canShare && navigator.canShare({ files })) {
-    try {
-      await navigator.share({ files });
-      showToast("🎉 在弹出菜单点「存储 " + files.length + " 张图像」即全进相册！");
-      return;
-    } catch (err) {
-      if (err && err.name === "AbortError") return;
-    }
+  const loaded = await preloadItemSlides(item);
+  if (loaded && loaded.length) {
+    showToast("✅ 原图已就绪，请再点一次保存", "#10b981");
   }
-  showToast("💡 请长按下方 P1~P" + files.length + " 缩略图逐张存相册", "#f59e0b");
 }
 
-async function reportAction(idx, action) {
-  const item = ITEMS[idx];
+async function reportAction(key, action) {
+  const item = getItemByKey(key);
+  if (!item) return;
   try {
     const resp = await fetch(`${BASE_TUNNEL}/api/mark?k=${encodeURIComponent(SECRET)}`, {
       method: "POST",
@@ -298,12 +384,40 @@ async function reportAction(idx, action) {
     });
     const res = await resp.json();
     if (res.ok) {
+      const domId = domIdOfKey(key);
+      const cardEl = document.getElementById(`card-${domId}`);
       if (action === "dismiss") {
         showToast("🗑️ 已移出待领队列");
-        boot();
+        if (preloadObserver && cardEl) {
+          try { preloadObserver.unobserve(cardEl); } catch (e) {}
+        }
+        preloadQueue = preloadQueue.filter(k => k !== key);
+        preloadQueuedKeys.delete(key);
+        delete preloadedFiles[key];
+        delete preloadPromises[key];
+        ITEMS = ITEMS.filter(x => itemKey(x) !== key);
+        if (cardEl) cardEl.remove();
+        updateConnSub();
+        if (!ITEMS.length) renderItems();
       } else if (action === "publish") {
         showToast("✅ 已同步回电脑总控台！");
-        boot();
+        item.published = true;
+        delete preloadedFiles[key];
+        delete preloadPromises[key];
+        if (cardEl) {
+          cardEl.classList.add("is-done");
+          const pubBtn = cardEl.querySelector('[data-pub-btn="1"]');
+          if (pubBtn) pubBtn.textContent = "✅ 已登记发帖（电脑总控台已同步）";
+          const metaEl = cardEl.querySelector(".prod-meta");
+          if (metaEl && !metaEl.querySelector('[data-pub-tag="1"]')) {
+            const tag = document.createElement("span");
+            tag.className = "tag tag-green";
+            tag.setAttribute("data-pub-tag", "1");
+            tag.textContent = "✅ 本号已登记发帖";
+            metaEl.appendChild(tag);
+          }
+        }
+        updateConnSub();
       } else {
         showToast("✅ 已记录加橱窗！");
       }
@@ -314,6 +428,13 @@ async function reportAction(idx, action) {
 }
 
 function renderItems() {
+  if (preloadObserver) {
+    preloadObserver.disconnect();
+    preloadObserver = null;
+  }
+  preloadQueue = [];
+  preloadQueuedKeys.clear();
+
   const root = document.getElementById("app");
   if (!ITEMS.length) {
     root.innerHTML = `<div class="card">
@@ -322,20 +443,24 @@ function renderItems() {
     </div>`;
     return;
   }
-  root.innerHTML = ITEMS.map((it, idx) => {
+  root.innerHTML = ITEMS.map((it) => {
+    const key = itemKey(it);
+    const keyJs = esc(escJs(key));
+    const domId = domIdOfKey(key);
+    const isPreloaded = !!(preloadedFiles[key] && preloadedFiles[key].length);
     const fallbackUrl = (it.tsp && it.tsp.share_url) ? it.tsp.share_url : (`${BASE_TUNNEL}/go_showcase/${encodeURIComponent(it.pid)}`);
     const isRealTsp = !!(it.tsp && it.tsp.share_url && it.tsp.is_tsp !== false);
     const tspBtn = isRealTsp
-      ? `<a class="btn btn-amber" href="${esc(it.tsp.share_url)}" target="_blank" onclick="reportAction(${idx}, 'cart')">
+      ? `<a class="btn btn-amber" href="${esc(it.tsp.share_url)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">
            💎 未挂车点此：直跳 TSP 高佣加橱窗 (${esc(it.tsp.partner_commission)}%+${esc(it.tsp.creator_commission)}%)
          </a>`
-      : `<a class="btn btn-amber" href="${esc(fallbackUrl)}" target="_blank" onclick="reportAction(${idx}, 'cart')">
+      : `<a class="btn btn-amber" href="${esc(fallbackUrl)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">
            🛒 未挂车点此：直跳 TikTok 达人加橱窗 (非TSP公开计划)
          </a>`;
     const thumbs = it.slide_names.map((sn, sIdx) => {
       const rawUrl = `${BASE_TUNNEL}/raw/${encodeURIComponent(it.pid)}/${encodeURIComponent(itemVariant(it))}/${encodeURIComponent(sn)}?k=${encodeURIComponent(SECRET)}`;
       return `<div class="slide-thumb-wrap">
-        <img src="${rawUrl}" alt="P${sIdx+1}">
+        <img src="${rawUrl}" loading="lazy" alt="P${sIdx+1}">
         <div class="slide-cap">P${sIdx+1} (${it.slide_sizes_kb[sIdx]}KB)</div>
       </div>`;
     }).join("");
@@ -350,30 +475,30 @@ function renderItems() {
            <div class="copy-hdr">📌 Title（标题）</div>
            <div class="copy-txt">${esc(it.title || '(无标题)')}</div>
          </div>
-         <button class="btn btn-blue" onclick="copyText(ITEMS[${idx}].title, 'Title 标题')">📋 一键复制 Title 标题</button>
+         <button class="btn btn-blue" onclick="copyItemField('${keyJs}', 'title', 'Title 标题')">📋 一键复制 Title 标题</button>
          <div class="copy-box">
            <div class="copy-hdr">📝 Caption（正文 + 标签）</div>
            <div class="copy-txt">${esc(it.caption || '(零正文)')}</div>
          </div>
-         <button class="btn btn-slate" onclick="copyText(ITEMS[${idx}].caption, 'Caption 正文')">📋 一键复制 Caption 正文</button>`;
+         <button class="btn btn-slate" onclick="copyItemField('${keyJs}', 'caption', 'Caption 正文')">📋 一键复制 Caption 正文</button>`;
 
-    return `<div class="card ${it.published ? 'is-done' : ''}">
+    return `<div class="card ${it.published ? 'is-done' : ''}" id="card-${esc(domId)}" data-item-key="${esc(key)}">
       <div class="prod-top">
         <div class="prod-name">${esc(it.cn_name)}</div>
-        <button class="btn-del" onclick="reportAction(${idx}, 'dismiss')">移出列表 ×</button>
+        <button class="btn-del" onclick="reportAction('${keyJs}', 'dismiss')">移出列表 ×</button>
       </div>
       <div class="prod-meta">
         <span class="tag">PID: ${esc(it.pid)}</span>
-        <span class="tag tag-green">${esc(it.variant_id.toUpperCase())} (${it.slide_names.length}张)</span>
+        <span class="tag tag-green">${esc(itemVariant(it).toUpperCase())} (${it.slide_names.length}张)</span>
         ${it.queued_at ? `<span class="tag">派单 ${esc(it.queued_at)}</span>` : ''}
-        ${it.published ? `<span class="tag tag-green">✅ 本号已登记发帖</span>` : ''}
+        ${it.published ? `<span class="tag tag-green" data-pub-tag="1">✅ 本号已登记发帖</span>` : ''}
       </div>
 
       ${tspBtn ? `<div class="step-label">🛒 橱窗挂车（若尚未加橱窗）</div>${tspBtn}` : ''}
 
       <div class="step-label">📸 第一步：存无损原图进系统相册</div>
-      <div class="preload-bar" id="preload-status-${idx}">⏳ 准备加载原图...</div>
-      <button id="save-btn-${idx}" class="btn btn-primary" disabled onclick="saveAllSlides(${idx})">⏳ 正在预加载原图...</button>
+      <div class="preload-bar" id="preload-status-${esc(domId)}">${isPreloaded ? `✅ ${it.slide_names.length} 张无损高清原图已就绪` : '💤 滑动到此自动预加载，或直接点下方按钮'}</div>
+      <button id="save-btn-${esc(domId)}" class="btn btn-primary" onclick="saveAllSlides('${keyJs}')">📥 一键存全套 ${it.slide_names.length} 张图到系统相册</button>
       <div class="help-tip">点上方红按钮 → 弹出菜单点 <b>「存储 ${it.slide_names.length} 张图像」</b> 按顺序一次全进相册（也可长按下方单图存）</div>
       <div class="slides-strip">${thumbs}</div>
 
@@ -381,23 +506,57 @@ function renderItems() {
 
       <div class="help-tip" style="margin-bottom:12px;">🎵 <b>防静音铁律</b>：进 TikTok 选好图后，<b>先挂橙色小黄车，最后再去顶部搜商用音乐</b>。</div>
 
-      <button class="btn btn-green" onclick="reportAction(${idx}, 'publish')">
+      <button class="btn btn-green" data-pub-btn="1" onclick="reportAction('${keyJs}', 'publish')">
         ${it.published ? '✅ 已登记发帖（电脑总控台已同步）' : '✅ 我已在手机发完帖（同步回电脑工作台）'}
       </button>
     </div>`;
   }).join("");
 
-  ITEMS.forEach((it, idx) => preloadItemSlides(it, idx));
-}
+  const initKeys = new Set();
+  for (let i = 0; i < ITEMS.length; i++) {
+    if (!ITEMS[i].published && initKeys.size < 2) {
+      const k = itemKey(ITEMS[i]);
+      initKeys.add(k);
+      schedulePreload(k);
+    }
+  }
 
-function itemVariant(it) {
-  return it.variant_id || "v1";
+  const remainingCards = Array.from(root.querySelectorAll(".card[data-item-key]")).filter((el) => {
+    const k = el.getAttribute("data-item-key");
+    return k && !initKeys.has(k);
+  });
+
+  if (remainingCards.length) {
+    if ("IntersectionObserver" in window) {
+      preloadObserver = new IntersectionObserver((entries, obs) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const k = entry.target.getAttribute("data-item-key");
+            obs.unobserve(entry.target);
+            if (k) schedulePreload(k);
+          }
+        }
+      }, { rootMargin: "260px 0px" });
+      for (const el of remainingCards) {
+        preloadObserver.observe(el);
+      }
+    } else {
+      for (const el of remainingCards) {
+        const k = el.getAttribute("data-item-key");
+        const it = k ? getItemByKey(k) : null;
+        if (it && !it.published) schedulePreload(k);
+      }
+    }
+  }
 }
 
 async function resolveTunnelUrl() {
   const sp = new URLSearchParams(location.search);
   const overrideUrl = OVERRIDE_TUNNEL || (sp.get("tunnel") || "").trim().replace(/\/+$/, "");
   if (overrideUrl) return overrideUrl;
+  if (!location.hostname.endsWith("github.io") && location.protocol.startsWith("http")) {
+    return location.origin.replace(/\/+$/, "");
+  }
 
   let lastErr = "Gist lookup failed";
   try {
@@ -450,8 +609,18 @@ async function boot() {
     const qResp = await fetch(`${BASE_TUNNEL}/api/queue/${encodeURIComponent(ACCT)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`, { cache: "no-store" });
     if (!qResp.ok) throw new Error("电脑服务未响应 (" + qResp.status + ")");
     const qData = await qResp.json();
+    if (preloadObserver) {
+      preloadObserver.disconnect();
+      preloadObserver = null;
+    }
+    preloadQueue = [];
+    preloadQueuedKeys.clear();
+    activePreloads = 0;
+    clearObjectProps(preloadedFiles);
+    clearObjectProps(preloadPromises);
+    LAST_SERVER_TIME = qData.server_time || "";
     ITEMS = qData.items || [];
-    sub.textContent = `🟢 已连上电脑总控台 · 待领 ${ITEMS.filter(x=>!x.published).length} 套 (${qData.server_time || ''})`;
+    updateConnSub();
     renderItems();
   } catch (err) {
     sub.textContent = "🔴 电脑总控台未在线";
