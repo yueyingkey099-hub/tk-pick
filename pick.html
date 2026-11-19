@@ -127,6 +127,115 @@
   }
   .self-warn { color: #fbbf24; margin-top: 5px; font-weight: 600; }
   .self-fail { color: #fca5a5; margin-top: 5px; }
+  .hook-section { margin-bottom: 10px; }
+  .hook-sec-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 7px;
+  }
+  .hook-mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 8px; }
+  .hook-mode-tab {
+    background: #0b1120; border: 1px solid #334155; color: #cbd5e1;
+    border-radius: 10px; padding: 9px 8px; font-size: 12.5px; font-weight: 700;
+    cursor: pointer; text-align: center;
+  }
+  .hook-mode-tab.active {
+    background: linear-gradient(135deg, rgba(254,44,85,0.24), rgba(225,29,72,0.16));
+    border-color: #fe2c55; color: #ffffff;
+  }
+  .hook-selected-bar {
+    background: #0b1120; border: 1px solid #263554; border-radius: 11px;
+    padding: 7px 9px; display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; margin-bottom: 8px;
+  }
+  .hook-sel-left { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
+  .hook-sel-thumb {
+    width: 34px; height: 45px; object-fit: cover; border-radius: 6px;
+    border: 1px solid #334155; flex-shrink: 0; background: #060911;
+  }
+  .hook-sel-text { font-size: 12px; font-weight: 700; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hook-sel-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .hook-mini-btn {
+    background: #1e293b; border: 1px solid #334155; color: #e2e8f0;
+    border-radius: 7px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+  }
+  .hook-subfilter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .hook-pill {
+    background: #0b1120; border: 1px solid #334155; color: #94a3b8;
+    border-radius: 999px; padding: 4px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  }
+  .hook-pill.active { background: #2563eb; border-color: #3b82f6; color: #ffffff; }
+  .hook-pool-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px;
+    max-height: 270px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 2px;
+  }
+  .hook-tile {
+    position: relative; background: #0b1120; border: 2px solid #263554;
+    border-radius: 10px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column;
+  }
+  .hook-tile.selected { border-color: #fe2c55; box-shadow: 0 0 0 1px rgba(254,44,85,0.45); }
+  .hook-tile-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #060911; display: block; }
+  .hook-tile-auto {
+    width: 100%; aspect-ratio: 3/4; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 4px;
+    background: linear-gradient(155deg, #1e293b, #0f172a); padding: 8px 6px; text-align: center;
+  }
+  .hook-tile-cap { padding: 5px 6px; font-size: 10.5px; line-height: 1.25; color: #e2e8f0; }
+  .hook-tile-title { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hook-tile-sub { font-size: 9.5px; color: #94a3b8; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hook-zoom-btn {
+    position: absolute; top: 4px; right: 4px; width: 24px; height: 24px;
+    border-radius: 999px; border: 1px solid rgba(255,255,255,0.28);
+    background: rgba(15,23,42,0.85); color: #fff; font-size: 12px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; padding: 0;
+  }
+  .hook-check-badge {
+    position: absolute; top: 4px; left: 4px; background: #fe2c55; color: #fff;
+    font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 999px; z-index: 2;
+  }
+  .hook-dyn-badge {
+    position: absolute; top: 4px; left: 4px; background: rgba(124,58,237,0.92); color: #f5f3ff;
+    font-size: 9.5px; font-weight: 700; padding: 2px 5px; border-radius: 5px; z-index: 1;
+  }
+  .hook-tile.selected .hook-dyn-badge { top: 24px; }
+  .hook-upload-drop {
+    border: 1.5px dashed #475569; border-radius: 12px; padding: 15px 12px;
+    text-align: center; background: rgba(11,17,32,0.75); cursor: pointer;
+    color: #e2e8f0; font-size: 13.5px; font-weight: 700;
+  }
+  .hook-upload-sub { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 4px; }
+  .hook-upload-preview {
+    background: #0b1120; border: 1px solid #263554; border-radius: 12px;
+    padding: 9px; display: flex; gap: 10px; align-items: center;
+  }
+  .hook-upload-preview img {
+    width: 68px; height: 90px; object-fit: cover; border-radius: 8px;
+    border: 1px solid #334155; flex-shrink: 0; background: #060911;
+  }
+  .hook-recent-wrap { margin-top: 9px; }
+  .hook-recent-hdr { font-size: 11.5px; color: #94a3b8; font-weight: 700; margin-bottom: 5px; }
+  .hook-recent-strip { display: flex; gap: 7px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 2px 0; }
+  .hook-recent-item {
+    flex: 0 0 68px; background: #0b1120; border: 2px solid #263554;
+    border-radius: 9px; overflow: hidden; cursor: pointer; text-align: center; position: relative;
+  }
+  .hook-recent-item.selected { border-color: #fe2c55; }
+  .hook-recent-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+  .hook-recent-cap { font-size: 9.5px; color: #cbd5e1; padding: 3px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hook-lightbox {
+    position: fixed; inset: 0; background: rgba(2,6,23,0.88); z-index: 1000;
+    display: none; align-items: center; justify-content: center; padding: 18px;
+  }
+  .hook-lightbox-inner {
+    width: 100%; max-width: 410px; background: #151f32; border: 1px solid #334155;
+    border-radius: 16px; padding: 14px; text-align: center;
+  }
+  .hook-lightbox-inner img {
+    width: 100%; max-height: 62vh; object-fit: contain; border-radius: 10px;
+    background: #050811; display: block; margin: 0 auto 10px;
+  }
+  .hook-lightbox-title { font-size: 14px; font-weight: 800; color: #f8fafc; margin-bottom: 4px; }
+  .hook-lightbox-sub { font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
+  .hook-lightbox-acts { display: flex; gap: 8px; }
 </style>
 </head>
 <body>
@@ -145,13 +254,77 @@
 
 <div id="selfSubmitDrawer" class="card self-drawer" style="display:none;">
   <div class="self-hdr">
-    <div class="self-title">✨ 自选品 · 自动拿TSP高佣码并出图置顶</div>
+    <div class="self-title">✨ 自选品 · 首图自选/去重 + 后2张自动生成</div>
     <button class="self-close" onclick="toggleSelfDrawer(false)">×</button>
   </div>
-  <div class="self-hint">粘贴 1–5 个商品 ID 或 TikTok 商品链接（换行/空格分隔），自动生高佣码并生成 1 套 3 页图文置顶到本号第 1 条</div>
+  <div class="self-hint">粘贴 1–5 个商品 ID 或 TikTok 链接，选好第 1 张钩子图，电脑自动拿高佣码并生成第 2 张价格卡 + 第 3 张场景图置顶待发</div>
   <textarea id="selfPidInput" class="self-textarea" rows="2" placeholder="例如：1732442313249624794 或直接粘 TikTok 商品链接"></textarea>
-  <button id="selfSubmitBtn" class="btn btn-primary" style="padding:12px 14px; font-size:15px; margin-bottom:8px;" onclick="submitSelfPids()">🚀 自动生码出图并置顶待发</button>
+
+  <div id="selfHookSection" class="hook-section">
+    <div class="hook-sec-hdr">
+      <span>🎯 第 1 张钩子图设置（后 2 张自动生成）</span>
+      <span style="font-size:11px; color:#94a3b8; font-weight:500;" id="hookPoolSummaryHint">爆款池加载中...</span>
+    </div>
+    <div class="hook-mode-tabs">
+      <button type="button" id="tabHookPool" class="hook-mode-tab active" onclick="setSelfHookMode('pool')">🔥 从爆款钩子池选</button>
+      <button type="button" id="tabHookUpload" class="hook-mode-tab" onclick="setSelfHookMode('upload')">📤 自己上传钩子图（自动去重）</button>
+    </div>
+
+    <div id="panelHookPool">
+      <div id="hookPoolSelectedBar" class="hook-selected-bar">
+        <div class="hook-sel-left">
+          <div class="hook-sel-text">🎲 当前首图：智能随机（28族爆款轮换）</div>
+        </div>
+      </div>
+      <div class="hook-subfilter">
+        <button type="button" class="hook-pill active" data-hook-filter="all" onclick="setHookPoolFilter('all')">全部(50)</button>
+        <button type="button" class="hook-pill" data-hook-filter="static" onclick="setHookPoolFilter('static')">🔥 静图钩子(40)</button>
+        <button type="button" class="hook-pill" data-hook-filter="dynamic" onclick="setHookPoolFilter('dynamic')">✨ 动态模板(10)</button>
+        <button type="button" class="hook-mini-btn" style="margin-left:auto;" onclick="loadHookPool(true)">🔄 刷新池</button>
+      </div>
+      <div id="hookPoolGrid" class="hook-pool-grid">
+        <div style="grid-column:1/-1; padding:16px; text-align:center; color:#94a3b8; font-size:12px;">⚡ 正在加载爆款钩子图库...</div>
+      </div>
+    </div>
+
+    <div id="panelHookUpload" style="display:none;">
+      <input type="file" id="selfHookFileInput" accept="image/*" style="display:none" onchange="handleHookFileSelect(event)">
+      <div id="hookUploadTrigger" class="hook-upload-drop" onclick="document.getElementById('selfHookFileInput').click()">
+        📷 从手机相册选图 / 拍照上传第 1 张钩子图
+        <div class="hook-upload-sub">自动清 EXIF + 保护白字微扰 + 微裁切倾角 + 隐形像素噪点，同图提交多品也会各自独立去重</div>
+      </div>
+      <div id="hookUploadPreview" class="hook-upload-preview" style="display:none;">
+        <img id="hookUploadImg" src="" alt="自传首图预览">
+        <div style="flex:1; min-width:0;">
+          <div id="hookUploadMetaTitle" style="font-size:12.5px; font-weight:800; color:#f8fafc;">已选首图</div>
+          <div id="hookUploadMetaSub" style="font-size:11px; color:#6ee7b7; margin-top:3px; line-height:1.35;">🛡️ 提交时自动 4D 像素去重（清EXIF+微裁切倾角+护字色扰+隐形噪点）</div>
+          <div style="display:flex; gap:6px; margin-top:7px;">
+            <button type="button" class="hook-mini-btn" onclick="document.getElementById('selfHookFileInput').click()">🔄 重选</button>
+            <button type="button" class="hook-mini-btn" onclick="clearUploadedHook()">✕ 清除</button>
+          </div>
+        </div>
+      </div>
+      <div id="hookRecentWrap" class="hook-recent-wrap" style="display:none;">
+        <div class="hook-recent-hdr">🕘 最近上传（点击直接复用，每次仍独立去重）</div>
+        <div id="hookRecentStrip" class="hook-recent-strip"></div>
+      </div>
+    </div>
+  </div>
+
+  <button id="selfSubmitBtn" class="btn btn-primary" style="padding:12px 14px; font-size:15px; margin-bottom:8px;" onclick="submitSelfPids()">🚀 自动生码出图（随机首图 + 自动后2张）</button>
   <div id="selfTaskBox" class="self-status" style="display:none;"></div>
+</div>
+
+<div id="hookLightbox" class="hook-lightbox" onclick="closeHookLightbox()">
+  <div class="hook-lightbox-inner" onclick="event.stopPropagation()">
+    <img id="hookLightboxImg" src="" alt="钩子大图预览">
+    <div id="hookLightboxTitle" class="hook-lightbox-title">钩子预览</div>
+    <div id="hookLightboxSub" class="hook-lightbox-sub"></div>
+    <div class="hook-lightbox-acts">
+      <button type="button" class="btn btn-primary" style="margin:0; padding:11px; font-size:14px; flex:1;" onclick="chooseFromLightbox()">✅ 就选这张做首图</button>
+      <button type="button" class="btn btn-slate" style="margin:0; padding:11px; font-size:14px; width:auto; min-width:86px;" onclick="closeHookLightbox()">关闭</button>
+    </div>
+  </div>
 </div>
 
 <div id="app">
@@ -176,6 +349,402 @@ let activePreloads = 0;
 const MAX_PRELOAD_CONC = 2;
 let selfPollTimer = null;
 let selfActiveTaskId = "";
+let HOOK_POOL_DATA = null;
+let HOOK_POOL_LOADING = false;
+let selfHookMode = "pool";
+let selfHookFilter = "all";
+let selectedPoolHookId = "";
+let uploadedHookB64 = "";
+let uploadedHookMeta = null;
+let selectedRecentUploadId = "";
+let lightboxHookId = "";
+
+function formatViewsShort(n) {
+  const v = Number(n || 0);
+  if (v >= 10000) return `${(v / 10000).toFixed(1).replace(/\.0$/, "")}万播`;
+  if (v >= 1000) return `${(v / 1000).toFixed(1).replace(/\.0$/, "")}k播`;
+  return v > 0 ? `${v}播` : "通用爆款";
+}
+
+function hookThumbUrl(hookId, full = false) {
+  if (!BASE_TUNNEL || !SECRET || !hookId) return "";
+  return `${BASE_TUNNEL}/api/hook_thumb/${encodeURIComponent(hookId)}?k=${encodeURIComponent(SECRET)}${full ? "&full=1" : ""}`;
+}
+
+function findHookInfoById(hookId) {
+  if (!HOOK_POOL_DATA || !hookId) return null;
+  const st = (HOOK_POOL_DATA.static_hooks || []).find(x => x.id === hookId);
+  if (st) return { kind: "static", item: st };
+  const dy = (HOOK_POOL_DATA.dynamic_hooks || []).find(x => x.id === hookId);
+  if (dy) return { kind: "dynamic", item: dy };
+  const up = (HOOK_POOL_DATA.recent_uploads || []).find(x => x.id === hookId);
+  if (up) return { kind: "upload", item: up };
+  return null;
+}
+
+function updateSelfSubmitBtnText() {
+  const btn = document.getElementById("selfSubmitBtn");
+  if (!btn) return;
+  if (selfHookMode === "upload") {
+    if (uploadedHookB64 || selectedRecentUploadId) {
+      btn.textContent = "🚀 自动生码出图（自传首图去重 + 自动后2张）";
+    } else {
+      btn.textContent = "🚀 请先选择/上传第 1 张钩子图";
+    }
+    return;
+  }
+  if (selectedPoolHookId) {
+    const info = findHookInfoById(selectedPoolHookId);
+    const shortName = (info && info.kind === "dynamic") ? info.item.title : selectedPoolHookId;
+    btn.textContent = `🚀 自动生码出图（已选 ${shortName} + 自动后2张）`;
+  } else {
+    btn.textContent = "🚀 自动生码出图（随机首图 + 自动后2张）";
+  }
+}
+
+function setSelfHookMode(mode) {
+  selfHookMode = (mode === "upload") ? "upload" : "pool";
+  const tabPool = document.getElementById("tabHookPool");
+  const tabUpload = document.getElementById("tabHookUpload");
+  const panelPool = document.getElementById("panelHookPool");
+  const panelUpload = document.getElementById("panelHookUpload");
+  if (tabPool) tabPool.classList.toggle("active", selfHookMode === "pool");
+  if (tabUpload) tabUpload.classList.toggle("active", selfHookMode === "upload");
+  if (panelPool) panelPool.style.display = (selfHookMode === "pool") ? "block" : "none";
+  if (panelUpload) panelUpload.style.display = (selfHookMode === "upload") ? "block" : "none";
+  updateSelfSubmitBtnText();
+}
+
+function setHookPoolFilter(filterVal) {
+  selfHookFilter = (filterVal === "static" || filterVal === "dynamic") ? filterVal : "all";
+  document.querySelectorAll(".hook-pill[data-hook-filter]").forEach(el => {
+    el.classList.toggle("active", el.getAttribute("data-hook-filter") === selfHookFilter);
+  });
+  renderHookPoolGrid();
+}
+
+function renderHookSelectedBar() {
+  const bar = document.getElementById("hookPoolSelectedBar");
+  if (!bar) return;
+  if (!selectedPoolHookId) {
+    bar.innerHTML = `<div class="hook-sel-left">
+      <div class="hook-sel-text">🎲 当前首图：智能随机（28族爆款轮换）</div>
+    </div>`;
+    return;
+  }
+  const info = findHookInfoById(selectedPoolHookId);
+  const titleTxt = info
+    ? (info.kind === "dynamic" ? `✨ ${info.item.title}` : `🔥 ${info.item.label}`)
+    : selectedPoolHookId;
+  const subTxt = info
+    ? (info.kind === "dynamic" ? info.item.subtitle : `复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · 自动4D去重`)
+    : "已固定第1张首图";
+  const thumb = hookThumbUrl(selectedPoolHookId, false);
+  const idJs = esc(escJs(selectedPoolHookId));
+  bar.innerHTML = `<div class="hook-sel-left">
+      ${thumb ? `<img class="hook-sel-thumb" src="${thumb}" alt="已选首图">` : ""}
+      <div style="min-width:0; flex:1;">
+        <div class="hook-sel-text">${esc(titleTxt)}</div>
+        <div class="hook-sel-sub">${esc(subTxt)}</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:5px; flex-shrink:0;">
+      <button type="button" class="hook-mini-btn" onclick="openHookLightbox('${idJs}', event)">👁 大图</button>
+      <button type="button" class="hook-mini-btn" onclick="selectPoolHook('')">改随机</button>
+    </div>`;
+}
+
+function selectPoolHook(hookId) {
+  selectedPoolHookId = hookId || "";
+  renderHookSelectedBar();
+  renderHookPoolGrid();
+  updateSelfSubmitBtnText();
+}
+
+function renderHookPoolGrid() {
+  const grid = document.getElementById("hookPoolGrid");
+  if (!grid) return;
+  if (!HOOK_POOL_DATA) {
+    grid.innerHTML = `<div style="grid-column:1/-1; padding:16px; text-align:center; color:#94a3b8; font-size:12px;">⚡ 正在加载爆款钩子图库...</div>`;
+    return;
+  }
+  const statics = HOOK_POOL_DATA.static_hooks || [];
+  const dynamics = HOOK_POOL_DATA.dynamic_hooks || [];
+  const allBtn = document.querySelector('.hook-pill[data-hook-filter="all"]');
+  const stBtn = document.querySelector('.hook-pill[data-hook-filter="static"]');
+  const dyBtn = document.querySelector('.hook-pill[data-hook-filter="dynamic"]');
+  if (allBtn) allBtn.textContent = `全部(${statics.length + dynamics.length})`;
+  if (stBtn) stBtn.textContent = `🔥 静图钩子(${statics.length})`;
+  if (dyBtn) dyBtn.textContent = `✨ 动态模板(${dynamics.length})`;
+
+  const tiles = [];
+  if (selfHookFilter === "all") {
+    const isAutoSel = !selectedPoolHookId;
+    tiles.push(`<div class="hook-tile ${isAutoSel ? 'selected' : ''}" onclick="selectPoolHook('')">
+      ${isAutoSel ? '<div class="hook-check-badge">✓ 已选</div>' : ''}
+      <div class="hook-tile-auto">
+        <div style="font-size:24px;">🎲</div>
+        <div style="font-size:12px; font-weight:800; color:#f8fafc;">智能随机</div>
+        <div style="font-size:10px; color:#94a3b8; line-height:1.3;">28个爆款视觉家族自动轮换不重样</div>
+      </div>
+      <div class="hook-tile-cap">
+        <div class="hook-tile-title">默认推荐</div>
+        <div class="hook-tile-sub">省心防同质</div>
+      </div>
+    </div>`);
+  }
+
+  if (selfHookFilter === "all" || selfHookFilter === "static") {
+    for (const h of statics) {
+      const sel = selectedPoolHookId === h.id;
+      const idJs = esc(escJs(h.id));
+      const tUrl = hookThumbUrl(h.id, false);
+      tiles.push(`<div class="hook-tile ${sel ? 'selected' : ''}" onclick="selectPoolHook('${idJs}')">
+        ${sel ? '<div class="hook-check-badge">✓</div>' : ''}
+        <button type="button" class="hook-zoom-btn" onclick="openHookLightbox('${idJs}', event)" title="查看大图">👁</button>
+        <img class="hook-tile-img" src="${tUrl}" loading="lazy" alt="${esc(h.id)}">
+        <div class="hook-tile-cap">
+          <div class="hook-tile-title">${esc(h.id)} · ${esc(h.family_label)}</div>
+          <div class="hook-tile-sub">复用${Number(h.reuse_count || 0)}次 · ${esc(formatViewsShort(h.total_views))}</div>
+        </div>
+      </div>`);
+    }
+  }
+
+  if (selfHookFilter === "all" || selfHookFilter === "dynamic") {
+    for (const d of dynamics) {
+      const sel = selectedPoolHookId === d.id;
+      const idJs = esc(escJs(d.id));
+      const tUrl = hookThumbUrl(d.id, false);
+      tiles.push(`<div class="hook-tile ${sel ? 'selected' : ''}" onclick="selectPoolHook('${idJs}')">
+        ${sel ? '<div class="hook-check-badge">✓</div>' : ''}
+        <div class="hook-dyn-badge">动态填价</div>
+        <button type="button" class="hook-zoom-btn" onclick="openHookLightbox('${idJs}', event)" title="查看大图">👁</button>
+        <img class="hook-tile-img" src="${tUrl}" loading="lazy" alt="${esc(d.title)}">
+        <div class="hook-tile-cap">
+          <div class="hook-tile-title">${esc(d.title)}</div>
+          <div class="hook-tile-sub">${esc(d.subtitle)}</div>
+        </div>
+      </div>`);
+    }
+  }
+
+  grid.innerHTML = tiles.join("");
+}
+
+function renderRecentUploads() {
+  const wrap = document.getElementById("hookRecentWrap");
+  const strip = document.getElementById("hookRecentStrip");
+  if (!wrap || !strip) return;
+  const recents = (HOOK_POOL_DATA && HOOK_POOL_DATA.recent_uploads) || [];
+  if (!recents.length) {
+    wrap.style.display = "none";
+    strip.innerHTML = "";
+    return;
+  }
+  wrap.style.display = "block";
+  strip.innerHTML = recents.map(u => {
+    const sel = !uploadedHookB64 && selectedRecentUploadId === u.id;
+    const idJs = esc(escJs(u.id));
+    const tUrl = hookThumbUrl(u.id, false);
+    return `<div class="hook-recent-item ${sel ? 'selected' : ''}" onclick="selectRecentUpload('${idJs}')">
+      ${sel ? '<div class="hook-check-badge" style="font-size:9px; padding:1px 5px;">✓</div>' : ''}
+      <img src="${tUrl}" loading="lazy" alt="${esc(u.label)}">
+      <div class="hook-recent-cap">${esc(u.uploaded_at || u.label)}</div>
+    </div>`;
+  }).join("");
+}
+
+async function loadHookPool(forceRefresh = false) {
+  if (!BASE_TUNNEL || !SECRET || HOOK_POOL_LOADING) return;
+  if (HOOK_POOL_DATA && !forceRefresh) {
+    renderHookSelectedBar();
+    renderHookPoolGrid();
+    renderRecentUploads();
+    updateSelfSubmitBtnText();
+    return;
+  }
+  HOOK_POOL_LOADING = true;
+  const hint = document.getElementById("hookPoolSummaryHint");
+  if (hint) hint.textContent = "正在加载爆款库...";
+  try {
+    const resp = await fetch(`${BASE_TUNNEL}/api/hook_pool?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`, { cache: "no-store" });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) throw new Error(data.error || ("HTTP " + resp.status));
+    HOOK_POOL_DATA = data;
+    const stCnt = (data.static_hooks || []).length;
+    const dyCnt = (data.dynamic_hooks || []).length;
+    if (hint) hint.textContent = `${stCnt}张静图 + ${dyCnt}套动态 (${data.family_count || 28}家族)`;
+    renderHookSelectedBar();
+    renderHookPoolGrid();
+    renderRecentUploads();
+    updateSelfSubmitBtnText();
+  } catch (err) {
+    if (hint) hint.textContent = "加载失败，可点刷新";
+    const grid = document.getElementById("hookPoolGrid");
+    if (grid && !HOOK_POOL_DATA) {
+      grid.innerHTML = `<div style="grid-column:1/-1; padding:14px; text-align:center; color:#fca5a5; font-size:12px;">⚠️ 爆款钩子池加载失败 (${esc(err.message)})</div>`;
+    }
+  } finally {
+    HOOK_POOL_LOADING = false;
+  }
+}
+
+function openHookLightbox(hookId, evt) {
+  if (evt) evt.stopPropagation();
+  if (!hookId) return;
+  lightboxHookId = hookId;
+  const box = document.getElementById("hookLightbox");
+  const img = document.getElementById("hookLightboxImg");
+  const titleEl = document.getElementById("hookLightboxTitle");
+  const subEl = document.getElementById("hookLightboxSub");
+  const info = findHookInfoById(hookId);
+  if (img) img.src = hookThumbUrl(hookId, true);
+  if (titleEl) {
+    if (info && info.kind === "dynamic") titleEl.textContent = `✨ ${info.item.title} (${hookId})`;
+    else if (info && info.kind === "static") titleEl.textContent = `🔥 ${info.item.label}`;
+    else titleEl.textContent = hookId;
+  }
+  if (subEl) {
+    if (info && info.kind === "dynamic") subEl.textContent = `${info.item.subtitle}（将自动填入你提交商品的名称与价格）`;
+    else if (info && info.kind === "static") subEl.textContent = `历史复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · 出图自动4D去重`;
+    else subEl.textContent = "";
+  }
+  if (box) box.style.display = "flex";
+}
+
+function closeHookLightbox() {
+  const box = document.getElementById("hookLightbox");
+  if (box) box.style.display = "none";
+}
+
+function chooseFromLightbox() {
+  const targetId = lightboxHookId;
+  closeHookLightbox();
+  if (!targetId) return;
+  if (targetId.startsWith("U_")) {
+    setSelfHookMode("upload");
+    selectRecentUpload(targetId);
+  } else {
+    setSelfHookMode("pool");
+    selectPoolHook(targetId);
+  }
+}
+
+function compressImageToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const objUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const maxSide = 1440;
+        let w = img.naturalWidth || img.width;
+        let h = img.naturalHeight || img.height;
+        if (!w || !h) throw new Error("无效图片尺寸");
+        if (Math.max(w, h) > maxSide) {
+          const ratio = maxSide / Math.max(w, h);
+          w = Math.max(1, Math.round(w * ratio));
+          h = Math.max(1, Math.round(h * ratio));
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        let dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+        if (dataUrl.length > 1250000) {
+          dataUrl = canvas.toDataURL("image/jpeg", 0.78);
+        }
+        URL.revokeObjectURL(objUrl);
+        resolve({ dataUrl, width: w, height: h, sizeKb: Math.round((dataUrl.length * 0.75) / 1024) });
+      } catch (e) {
+        URL.revokeObjectURL(objUrl);
+        reject(e);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objUrl);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const res = String(reader.result || "");
+        if (!res) reject(new Error("读取图片失败"));
+        else resolve({ dataUrl: res, width: 0, height: 0, sizeKb: Math.round((res.length * 0.75) / 1024) });
+      };
+      reader.onerror = () => reject(new Error("读取图片失败"));
+      reader.readAsDataURL(file);
+    };
+    img.src = objUrl;
+  });
+}
+
+function renderUploadPreviewState() {
+  const trig = document.getElementById("hookUploadTrigger");
+  const prev = document.getElementById("hookUploadPreview");
+  const img = document.getElementById("hookUploadImg");
+  const tEl = document.getElementById("hookUploadMetaTitle");
+  const sEl = document.getElementById("hookUploadMetaSub");
+  if (uploadedHookB64) {
+    if (trig) trig.style.display = "none";
+    if (prev) prev.style.display = "flex";
+    if (img) img.src = uploadedHookB64;
+    if (tEl && uploadedHookMeta) {
+      const dim = (uploadedHookMeta.width && uploadedHookMeta.height) ? `${uploadedHookMeta.width}×${uploadedHookMeta.height} · ` : "";
+      tEl.textContent = `已选首图 (${dim}约 ${uploadedHookMeta.sizeKb}KB)`;
+    }
+    if (sEl) sEl.textContent = "🛡️ 提交时自动 4D 像素去重（清EXIF+微裁切倾角+护字色扰+隐形噪点）";
+  } else if (selectedRecentUploadId) {
+    if (trig) trig.style.display = "none";
+    if (prev) prev.style.display = "flex";
+    if (img) img.src = hookThumbUrl(selectedRecentUploadId, false);
+    const info = findHookInfoById(selectedRecentUploadId);
+    if (tEl) tEl.textContent = `已复用：${(info && info.item && info.item.label) ? info.item.label : selectedRecentUploadId}`;
+    if (sEl) sEl.textContent = "♻️ 复用历史自传图（本次出图仍会单独做全新 4D 去重）";
+  } else {
+    if (trig) trig.style.display = "block";
+    if (prev) prev.style.display = "none";
+    if (img) img.src = "";
+  }
+  renderRecentUploads();
+  updateSelfSubmitBtnText();
+}
+
+async function handleHookFileSelect(evt) {
+  const inp = evt && evt.target;
+  const file = inp && inp.files && inp.files[0];
+  if (inp) inp.value = "";
+  if (!file) return;
+  if (file.type && !file.type.startsWith("image/")) {
+    showToast("⚠️ 请选择图片文件", "#f59e0b");
+    return;
+  }
+  try {
+    showToast("⏳ 正在处理所选钩子图...", "#3b82f6");
+    const res = await compressImageToDataUrl(file);
+    uploadedHookB64 = res.dataUrl;
+    uploadedHookMeta = { width: res.width, height: res.height, sizeKb: res.sizeKb, name: file.name || "" };
+    selectedRecentUploadId = "";
+    renderUploadPreviewState();
+    showToast("✅ 已加载首图，提交后自动做 4D 去重！");
+  } catch (err) {
+    showToast("⚠️ 图片处理失败：" + (err.message || "请换一张图片"), "#ef4444");
+  }
+}
+
+function selectRecentUpload(uid) {
+  uploadedHookB64 = "";
+  uploadedHookMeta = null;
+  selectedRecentUploadId = uid || "";
+  renderUploadPreviewState();
+}
+
+function clearUploadedHook() {
+  uploadedHookB64 = "";
+  uploadedHookMeta = null;
+  selectedRecentUploadId = "";
+  renderUploadPreviewState();
+}
 
 function toggleSelfDrawer(forceOpen) {
   const drawer = document.getElementById("selfSubmitDrawer");
@@ -183,6 +752,7 @@ function toggleSelfDrawer(forceOpen) {
   const open = (typeof forceOpen === "boolean") ? forceOpen : (drawer.style.display === "none");
   drawer.style.display = open ? "block" : "none";
   if (open) {
+    loadHookPool(false);
     const inp = document.getElementById("selfPidInput");
     if (inp) setTimeout(() => inp.focus(), 60);
   }
@@ -217,6 +787,9 @@ function renderSelfTaskStatus(task) {
   const box = document.getElementById("selfTaskBox");
   if (!box || !task) return;
   box.style.display = "block";
+  const hookBadge = task.hook_label
+    ? `<div style="font-size:12px; color:#93c5fd; margin-top:4px;">🎯 首图策略：${esc(task.hook_label)} + 自动后2张</div>`
+    : "";
   const warnsHtml = (task.warnings || []).map(w => `<div class="self-warn">${esc(w)}</div>`).join("");
   const fails = (task.failed || []).concat(task.skipped_initial || []);
   const failsHtml = fails.length
@@ -224,9 +797,9 @@ function renderSelfTaskStatus(task) {
     : "";
   const genList = task.generated || [];
   const genHtml = genList.length
-    ? `<div style="color:#6ee7b7; margin-top:5px;">📦 已置顶待发: ${genList.map(g => `${esc(g.pid)}(${esc((g.variant_id || 'v1').toUpperCase())}${g.has_tsp ? '·💎高佣' : '·公开佣'})`).join("、")}</div>`
+    ? `<div style="color:#6ee7b7; margin-top:5px;">📦 已置顶待发: ${genList.map(g => `${esc(g.pid)}(${esc((g.variant_id || 'v1').toUpperCase())}${g.has_tsp ? '·💎高佣' : '·公开佣'}${g.dedup_strong ? '·🛡️已去重' : ''})`).join("、")}</div>`
     : "";
-  box.innerHTML = `<div style="font-weight:700;">${esc(task.stage_label || task.status || "处理中...")}</div>${genHtml}${warnsHtml}${failsHtml}`;
+  box.innerHTML = `<div style="font-weight:700;">${esc(task.stage_label || task.status || "处理中...")}</div>${hookBadge}${genHtml}${warnsHtml}${failsHtml}`;
 }
 
 function stopSelfPolling() {
@@ -280,13 +853,35 @@ async function submitSelfPids() {
     showToast("⚠️ 请粘贴商品 ID 或 TikTok 商品链接", "#f59e0b");
     return;
   }
+  let postHookMode = "auto";
+  let postHookId = "";
+  let postHookB64 = "";
+  if (selfHookMode === "upload") {
+    if (!uploadedHookB64 && !selectedRecentUploadId) {
+      showToast("⚠️ 请先从相册选一张第 1 张钩子图，或切回「爆款钩子池」", "#f59e0b");
+      return;
+    }
+    postHookMode = "upload";
+    if (uploadedHookB64) postHookB64 = uploadedHookB64;
+    else postHookId = selectedRecentUploadId;
+  } else if (selectedPoolHookId) {
+    postHookMode = "pool";
+    postHookId = selectedPoolHookId;
+  }
+
   const btn = document.getElementById("selfSubmitBtn");
   if (btn) btn.disabled = true;
   try {
     const resp = await fetch(`${BASE_TUNNEL}/api/self_submit?k=${encodeURIComponent(SECRET)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ account_key: ACCT, raw_text: rawText })
+      body: JSON.stringify({
+        account_key: ACCT,
+        raw_text: rawText,
+        hook_mode: postHookMode,
+        hook_id: postHookId,
+        hook_image_b64: postHookB64
+      })
     });
     const data = await resp.json();
     if (!resp.ok || !data.ok || !data.task) {
@@ -300,6 +895,14 @@ async function submitSelfPids() {
       return;
     }
     if (inp) inp.value = "";
+    if (postHookMode === "upload" && data.task.hook_id) {
+      if (uploadedHookB64) {
+        uploadedHookB64 = "";
+        selectedRecentUploadId = data.task.hook_id;
+        renderUploadPreviewState();
+      }
+      setTimeout(() => loadHookPool(true), 600);
+    }
     renderSelfTaskStatus(data.task);
     showToast("⏳ 已提交，正在自动生码出图...");
     pollSelfTask(data.task.task_id);
