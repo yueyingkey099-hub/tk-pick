@@ -158,6 +158,25 @@
     background: #1e293b; border: 1px solid #334155; color: #e2e8f0;
     border-radius: 7px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0;
   }
+  .hook-text-toggle-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    flex-wrap: wrap; margin-bottom: 8px; padding: 6px 8px;
+    background: #0b1120; border: 1px solid #263554; border-radius: 10px;
+  }
+  .hook-text-toggle-lbl { font-size: 11.5px; color: #cbd5e1; font-weight: 700; }
+  .hook-seg-switch {
+    display: inline-flex; background: #060a14; border: 1px solid #334155;
+    border-radius: 999px; padding: 2px; gap: 2px;
+  }
+  .hook-seg-btn {
+    border: none; background: transparent; color: #94a3b8;
+    border-radius: 999px; padding: 5px 11px; font-size: 11.5px; font-weight: 800; cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .hook-seg-btn.active {
+    background: linear-gradient(135deg, #fe2c55, #e11d48); color: #ffffff;
+    box-shadow: 0 1px 6px rgba(254,44,85,0.35);
+  }
   .hook-subfilter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
   .hook-pill {
     background: #0b1120; border: 1px solid #334155; color: #94a3b8;
@@ -280,6 +299,13 @@
     </div>
 
     <div id="panelHookPool">
+      <div class="hook-text-toggle-row">
+        <span class="hook-text-toggle-lbl">静图版本开关：</span>
+        <div class="hook-seg-switch" role="group" aria-label="钩子图有无字开关">
+          <button type="button" id="btnTextModeClean" class="hook-seg-btn active" onclick="setHookTextMode('clean')">✂️ 无字底图(23)</button>
+          <button type="button" id="btnTextModeOrig" class="hook-seg-btn" onclick="setHookTextMode('original')">🔤 原版带字(40)</button>
+        </div>
+      </div>
       <div id="hookPoolSelectedBar" class="hook-selected-bar">
         <div class="hook-sel-left">
           <div class="hook-sel-text">🎲 当前首图：智能随机（23张无字底图轮换）</div>
@@ -363,11 +389,23 @@ let HOOK_POOL_DATA = null;
 let HOOK_POOL_LOADING = false;
 let selfHookMode = "pool";
 let selfHookFilter = "all";
+let hookTextMode = (() => {
+  try { return localStorage.getItem("tk_pick_hook_text_mode") === "original" ? "original" : "clean"; }
+  catch (e) { return "clean"; }
+})();
 let selectedPoolHookId = "";
 let uploadedHookB64 = "";
 let uploadedHookMeta = null;
 let selectedRecentUploadId = "";
 let lightboxHookId = "";
+
+function getActiveStaticHooks() {
+  if (!HOOK_POOL_DATA) return [];
+  if (hookTextMode === "original" && Array.isArray(HOOK_POOL_DATA.static_hooks_original)) {
+    return HOOK_POOL_DATA.static_hooks_original;
+  }
+  return HOOK_POOL_DATA.static_hooks || [];
+}
 
 function formatViewsShort(n) {
   const v = Number(n || 0);
@@ -378,18 +416,68 @@ function formatViewsShort(n) {
 
 function hookThumbUrl(hookId, full = false) {
   if (!BASE_TUNNEL || !SECRET || !hookId) return "";
-  return `${BASE_TUNNEL}/api/hook_thumb/${encodeURIComponent(hookId)}?k=${encodeURIComponent(SECRET)}${full ? "&full=1" : ""}&v=clean2`;
+  const isStatic = /^H\d{3,}$/.test(hookId);
+  const modeQ = isStatic
+    ? `&variant=${encodeURIComponent(hookTextMode)}&v=${hookTextMode === "original" ? "orig1" : "clean2"}`
+    : "";
+  return `${BASE_TUNNEL}/api/hook_thumb/${encodeURIComponent(hookId)}?k=${encodeURIComponent(SECRET)}${full ? "&full=1" : ""}${modeQ}`;
 }
 
 function findHookInfoById(hookId) {
   if (!HOOK_POOL_DATA || !hookId) return null;
-  const st = (HOOK_POOL_DATA.static_hooks || []).find(x => x.id === hookId);
+  const st = getActiveStaticHooks().find(x => x.id === hookId);
   if (st) return { kind: "static", item: st };
   const dy = (HOOK_POOL_DATA.dynamic_hooks || []).find(x => x.id === hookId);
   if (dy) return { kind: "dynamic", item: dy };
   const up = (HOOK_POOL_DATA.recent_uploads || []).find(x => x.id === hookId);
   if (up) return { kind: "upload", item: up };
   return null;
+}
+
+function syncHookTextToggleUi() {
+  const cleanBtn = document.getElementById("btnTextModeClean");
+  const origBtn = document.getElementById("btnTextModeOrig");
+  const cleanCnt = (HOOK_POOL_DATA && Array.isArray(HOOK_POOL_DATA.static_hooks)) ? HOOK_POOL_DATA.static_hooks.length : 23;
+  const origCnt = (HOOK_POOL_DATA && Array.isArray(HOOK_POOL_DATA.static_hooks_original)) ? HOOK_POOL_DATA.static_hooks_original.length : 40;
+  if (cleanBtn) {
+    cleanBtn.classList.toggle("active", hookTextMode === "clean");
+    cleanBtn.textContent = `✂️ 无字底图(${cleanCnt})`;
+  }
+  if (origBtn) {
+    origBtn.classList.toggle("active", hookTextMode === "original");
+    origBtn.textContent = `🔤 原版带字(${origCnt})`;
+  }
+  const hint = document.getElementById("hookPoolSummaryHint");
+  if (hint && HOOK_POOL_DATA) {
+    const stCnt = getActiveStaticHooks().length;
+    const dyCnt = (HOOK_POOL_DATA.dynamic_hooks || []).length;
+    if (hookTextMode === "original") {
+      hint.textContent = `${stCnt}张原版带字 + ${dyCnt}套动态 (${HOOK_POOL_DATA.family_count_original || 28}家族)`;
+    } else {
+      hint.textContent = `${stCnt}张无字静图 + ${dyCnt}套带字动态 (${HOOK_POOL_DATA.family_count || 23}类)`;
+    }
+  }
+}
+
+function setHookTextMode(mode) {
+  hookTextMode = (mode === "original") ? "original" : "clean";
+  try { localStorage.setItem("tk_pick_hook_text_mode", hookTextMode); } catch (e) {}
+  if (selectedPoolHookId && /^H\d{3,}$/.test(selectedPoolHookId)) {
+    const targetList = getActiveStaticHooks();
+    if (!targetList.some(x => x.id === selectedPoolHookId)) {
+      if (hookTextMode === "clean" && HOOK_POOL_DATA && Array.isArray(HOOK_POOL_DATA.static_hooks_original)) {
+        const origRec = HOOK_POOL_DATA.static_hooks_original.find(x => x.id === selectedPoolHookId);
+        const canon = origRec && origRec.canonical_id;
+        selectedPoolHookId = (canon && targetList.some(x => x.id === canon)) ? canon : "";
+      } else {
+        selectedPoolHookId = "";
+      }
+    }
+  }
+  syncHookTextToggleUi();
+  renderHookSelectedBar();
+  renderHookPoolGrid();
+  updateSelfSubmitBtnText();
 }
 
 function updateSelfSubmitBtnText() {
@@ -405,10 +493,13 @@ function updateSelfSubmitBtnText() {
   }
   if (selectedPoolHookId) {
     const info = findHookInfoById(selectedPoolHookId);
-    const shortName = (info && info.kind === "dynamic") ? info.item.title : selectedPoolHookId;
+    const shortName = (info && info.kind === "dynamic")
+      ? info.item.title
+      : `${selectedPoolHookId}(${hookTextMode === "original" ? "带字" : "无字"})`;
     btn.textContent = `🚀 自动生码出图（已选 ${shortName} + 自动后2张）`;
   } else {
-    btn.textContent = "🚀 自动生码出图（随机首图 + 自动后2张）";
+    const modeLbl = hookTextMode === "original" ? "带字+动态" : "无字底图";
+    btn.textContent = `🚀 自动生码出图（随机${modeLbl} + 自动后2张）`;
   }
 }
 
@@ -445,8 +536,11 @@ function renderHookSelectedBar() {
   const bar = document.getElementById("hookPoolSelectedBar");
   if (!bar) return;
   if (!selectedPoolHookId) {
+    const randDesc = hookTextMode === "original"
+      ? "🎲 当前首图：智能随机（40张原版带字+10动态轮换）"
+      : "🎲 当前首图：智能随机（23张无字底图轮换）";
     bar.innerHTML = `<div class="hook-sel-left">
-      <div class="hook-sel-text">🎲 当前首图：智能随机（23张无字底图轮换）</div>
+      <div class="hook-sel-text">${randDesc}</div>
     </div>`;
     return;
   }
@@ -454,8 +548,9 @@ function renderHookSelectedBar() {
   const titleTxt = info
     ? (info.kind === "dynamic" ? `✨ ${info.item.title}` : `🔥 ${info.item.label}`)
     : selectedPoolHookId;
+  const staticSub = hookTextMode === "original" ? "原版带字爆款 · 自动4D去重" : "纯净无字底图(可在TikTok加字)";
   const subTxt = info
-    ? (info.kind === "dynamic" ? info.item.subtitle : `复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · 纯净无字底图(可在TikTok加字)`)
+    ? (info.kind === "dynamic" ? info.item.subtitle : `复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · ${staticSub}`)
     : "已固定第1张首图";
   const thumb = hookThumbUrl(selectedPoolHookId, false);
   const idJs = esc(escJs(selectedPoolHookId));
@@ -486,24 +581,28 @@ function renderHookPoolGrid() {
     grid.innerHTML = `<div style="grid-column:1/-1; padding:16px; text-align:center; color:#94a3b8; font-size:12px;">⚡ 正在加载爆款钩子图库...</div>`;
     return;
   }
-  const statics = HOOK_POOL_DATA.static_hooks || [];
+  const statics = getActiveStaticHooks();
   const dynamics = HOOK_POOL_DATA.dynamic_hooks || [];
   const allBtn = document.querySelector('.hook-pill[data-hook-filter="all"]');
   const stBtn = document.querySelector('.hook-pill[data-hook-filter="static"]');
   const dyBtn = document.querySelector('.hook-pill[data-hook-filter="dynamic"]');
   if (allBtn) allBtn.textContent = `全部(${statics.length + dynamics.length})`;
-  if (stBtn) stBtn.textContent = `🔥 无字静图(${statics.length})`;
+  if (stBtn) stBtn.textContent = hookTextMode === "original" ? `🔥 带字静图(${statics.length})` : `🔥 无字静图(${statics.length})`;
   if (dyBtn) dyBtn.textContent = `✨ 带字动态模板(${dynamics.length})`;
 
   const tiles = [];
   if (selfHookFilter === "all") {
     const isAutoSel = !selectedPoolHookId;
+    const autoTitle = hookTextMode === "original" ? "智能随机(带字+动态)" : "智能随机(无字底图)";
+    const autoSub = hookTextMode === "original"
+      ? `${statics.length}带字+${dynamics.length}动态自动轮换不重样`
+      : `${statics.length}张去字爆款底图轮换，可在TikTok自由加字`;
     tiles.push(`<div class="hook-tile ${isAutoSel ? 'selected' : ''}" onclick="selectPoolHook('')">
       ${isAutoSel ? '<div class="hook-check-badge">✓ 已选</div>' : ''}
       <div class="hook-tile-auto">
         <div style="font-size:24px;">🎲</div>
-        <div style="font-size:12px; font-weight:800; color:#f8fafc;">智能随机(无字底图)</div>
-        <div style="font-size:10px; color:#94a3b8; line-height:1.3;">23张去字爆款底图轮换，可在TikTok自由加字</div>
+        <div style="font-size:12px; font-weight:800; color:#f8fafc;">${autoTitle}</div>
+        <div style="font-size:10px; color:#94a3b8; line-height:1.3;">${autoSub}</div>
       </div>
       <div class="hook-tile-cap">
         <div class="hook-tile-title">默认推荐</div>
@@ -576,6 +675,7 @@ function renderRecentUploads() {
 async function loadHookPool(forceRefresh = false) {
   if (!BASE_TUNNEL || !SECRET || HOOK_POOL_LOADING) return;
   if (HOOK_POOL_DATA && !forceRefresh) {
+    syncHookTextToggleUi();
     renderHookSelectedBar();
     renderHookPoolGrid();
     renderRecentUploads();
@@ -590,9 +690,7 @@ async function loadHookPool(forceRefresh = false) {
     const data = await resp.json();
     if (!resp.ok || !data.ok) throw new Error(data.error || ("HTTP " + resp.status));
     HOOK_POOL_DATA = data;
-    const stCnt = (data.static_hooks || []).length;
-    const dyCnt = (data.dynamic_hooks || []).length;
-    if (hint) hint.textContent = `${stCnt}张无字静图 + ${dyCnt}套带字动态 (${data.family_count || 23}类)`;
+    syncHookTextToggleUi();
     renderHookSelectedBar();
     renderHookPoolGrid();
     renderRecentUploads();
@@ -625,7 +723,7 @@ function openHookLightbox(hookId, evt) {
   }
   if (subEl) {
     if (info && info.kind === "dynamic") subEl.textContent = `${info.item.subtitle}（将自动填入你提交商品的名称与价格）`;
-    else if (info && info.kind === "static") subEl.textContent = `历史复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · 出图自动4D去重`;
+    else if (info && info.kind === "static") subEl.textContent = `历史复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · ${hookTextMode === "original" ? "原版带字爆款 · 出图自动4D去重" : "纯净无字底图(可在TikTok自由加字)"}`;
     else subEl.textContent = "";
   }
   if (box) box.style.display = "flex";
@@ -770,6 +868,7 @@ function toggleSelfDrawer(forceOpen) {
   const open = (typeof forceOpen === "boolean") ? forceOpen : (drawer.style.display === "none");
   drawer.style.display = open ? "block" : "none";
   if (open) {
+    syncHookTextToggleUi();
     loadHookPool(false);
     const inp = document.getElementById("selfPidInput");
     if (inp) setTimeout(() => inp.focus(), 60);
@@ -898,6 +997,7 @@ async function submitSelfPids() {
         raw_text: rawText,
         hook_mode: postHookMode,
         hook_id: postHookId,
+        hook_text_mode: hookTextMode,
         hook_image_b64: postHookB64
       })
     });
