@@ -165,17 +165,26 @@
   }
   .hook-pill.active { background: #2563eb; border-color: #3b82f6; color: #ffffff; }
   .hook-pool-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px;
-    max-height: 270px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 2px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 10px;
+    max-height: min(68vh, 720px); min-height: 360px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px;
+  }
+  .hook-pool-grid.is-expanded {
+    max-height: none; overflow-y: visible;
+  }
+  @media (max-width: 560px) {
+    .hook-pool-grid {
+      grid-template-columns: repeat(3, 1fr); gap: 7px;
+      max-height: 58vh; min-height: 320px; padding: 2px;
+    }
   }
   .hook-tile {
     position: relative; background: #0b1120; border: 2px solid #263554;
     border-radius: 10px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column;
   }
   .hook-tile.selected { border-color: #fe2c55; box-shadow: 0 0 0 1px rgba(254,44,85,0.45); }
-  .hook-tile-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #060911; display: block; }
+  .hook-tile-img { width: 100%; aspect-ratio: 9/16; object-fit: contain; background: #060911; display: block; }
   .hook-tile-auto {
-    width: 100%; aspect-ratio: 3/4; display: flex; flex-direction: column;
+    width: 100%; aspect-ratio: 9/16; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 4px;
     background: linear-gradient(155deg, #1e293b, #0f172a); padding: 8px 6px; text-align: center;
   }
@@ -208,7 +217,7 @@
     padding: 9px; display: flex; gap: 10px; align-items: center;
   }
   .hook-upload-preview img {
-    width: 68px; height: 90px; object-fit: cover; border-radius: 8px;
+    width: 68px; height: 90px; object-fit: contain; border-radius: 8px;
     border: 1px solid #334155; flex-shrink: 0; background: #060911;
   }
   .hook-recent-wrap { margin-top: 9px; }
@@ -219,18 +228,18 @@
     border-radius: 9px; overflow: hidden; cursor: pointer; text-align: center; position: relative;
   }
   .hook-recent-item.selected { border-color: #fe2c55; }
-  .hook-recent-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+  .hook-recent-item img { width: 100%; aspect-ratio: 9/16; object-fit: contain; background: #060911; display: block; }
   .hook-recent-cap { font-size: 9.5px; color: #cbd5e1; padding: 3px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hook-lightbox {
     position: fixed; inset: 0; background: rgba(2,6,23,0.88); z-index: 1000;
     display: none; align-items: center; justify-content: center; padding: 18px;
   }
   .hook-lightbox-inner {
-    width: 100%; max-width: 410px; background: #151f32; border: 1px solid #334155;
+    width: 100%; max-width: min(92vw, 520px); background: #151f32; border: 1px solid #334155;
     border-radius: 16px; padding: 14px; text-align: center;
   }
   .hook-lightbox-inner img {
-    width: 100%; max-height: 62vh; object-fit: contain; border-radius: 10px;
+    width: 100%; max-height: 76vh; object-fit: contain; border-radius: 10px;
     background: #050811; display: block; margin: 0 auto 10px;
   }
   .hook-lightbox-title { font-size: 14px; font-weight: 800; color: #f8fafc; margin-bottom: 4px; }
@@ -280,7 +289,8 @@
         <button type="button" class="hook-pill active" data-hook-filter="all" onclick="setHookPoolFilter('all')">全部(50)</button>
         <button type="button" class="hook-pill" data-hook-filter="static" onclick="setHookPoolFilter('static')">🔥 静图钩子(40)</button>
         <button type="button" class="hook-pill" data-hook-filter="dynamic" onclick="setHookPoolFilter('dynamic')">✨ 动态模板(10)</button>
-        <button type="button" class="hook-mini-btn" style="margin-left:auto;" onclick="loadHookPool(true)">🔄 刷新池</button>
+        <button type="button" id="btnExpandHookGrid" class="hook-mini-btn" style="margin-left:auto;" onclick="toggleHookGridExpand()">⤢ 展开看全部</button>
+        <button type="button" class="hook-mini-btn" onclick="loadHookPool(true)">🔄 刷新池</button>
       </div>
       <div id="hookPoolGrid" class="hook-pool-grid">
         <div style="grid-column:1/-1; padding:16px; text-align:center; color:#94a3b8; font-size:12px;">⚡ 正在加载爆款钩子图库...</div>
@@ -421,6 +431,14 @@ function setHookPoolFilter(filterVal) {
     el.classList.toggle("active", el.getAttribute("data-hook-filter") === selfHookFilter);
   });
   renderHookPoolGrid();
+}
+
+function toggleHookGridExpand() {
+  const grid = document.getElementById("hookPoolGrid");
+  const btn = document.getElementById("btnExpandHookGrid");
+  if (!grid) return;
+  const expanded = grid.classList.toggle("is-expanded");
+  if (btn) btn.textContent = expanded ? "🔽 收起高度" : "⤢ 展开看全部";
 }
 
 function renderHookSelectedBar() {
