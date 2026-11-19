@@ -400,7 +400,6 @@ async function reportAction(key, action) {
         updateConnSub();
         if (!ITEMS.length) renderItems();
       } else if (action === "publish") {
-        showToast("✅ 已同步回电脑总控台！");
         item.published = true;
         delete preloadedFiles[key];
         delete preloadPromises[key];
@@ -417,7 +416,16 @@ async function reportAction(key, action) {
             metaEl.appendChild(tag);
           }
         }
+        let addedRefill = 0;
+        if (Array.isArray(res.refilled_items) && res.refilled_items.length > 0) {
+          addedRefill = appendRefilledItems(res.refilled_items);
+        }
         updateConnSub();
+        if (addedRefill > 0) {
+          showToast(`✅ 已登记发帖！已从中央池自动补货 +${addedRefill} 套`);
+        } else {
+          showToast("✅ 已同步回电脑总控台！");
+        }
       } else {
         showToast("✅ 已记录加橱窗！");
       }
@@ -425,6 +433,126 @@ async function reportAction(key, action) {
   } catch (e) {
     showToast("⚠️ 网络波动，稍后再试", "#ef4444");
   }
+}
+
+function renderCardHtml(it) {
+  const key = itemKey(it);
+  const keyJs = esc(escJs(key));
+  const domId = domIdOfKey(key);
+  const isPreloaded = !!(preloadedFiles[key] && preloadedFiles[key].length);
+  const fallbackUrl = (it.tsp && it.tsp.share_url) ? it.tsp.share_url : (`${BASE_TUNNEL}/go_showcase/${encodeURIComponent(it.pid)}`);
+  const isRealTsp = !!(it.tsp && it.tsp.share_url && it.tsp.is_tsp !== false);
+  const tspBtn = isRealTsp
+    ? `<a class="btn btn-amber" href="${esc(it.tsp.share_url)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">
+         💎 未挂车点此：直跳 TSP 高佣加橱窗 (${esc(it.tsp.partner_commission)}%+${esc(it.tsp.creator_commission)}%)
+       </a>`
+    : `<a class="btn btn-amber" href="${esc(fallbackUrl)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">
+         🛒 未挂车点此：直跳 TikTok 达人加橱窗 (非TSP公开计划)
+       </a>`;
+  const thumbs = it.slide_names.map((sn, sIdx) => {
+    const rawUrl = `${BASE_TUNNEL}/raw/${encodeURIComponent(it.pid)}/${encodeURIComponent(itemVariant(it))}/${encodeURIComponent(sn)}?k=${encodeURIComponent(SECRET)}`;
+    return `<div class="slide-thumb-wrap">
+      <img src="${rawUrl}" loading="lazy" alt="P${sIdx+1}">
+      <div class="slide-cap">P${sIdx+1} (${it.slide_sizes_kb[sIdx]}KB)</div>
+    </div>`;
+  }).join("");
+
+  const hasTitle = !!(it.title || "").trim();
+  const hasCaption = !!(it.caption || "").trim();
+  const copySection = (!hasTitle && !hasCaption)
+    ? `<div class="step-label">📋 第二步：发布文案说明</div>
+       <div class="zero-copy-hint">✨ 本套为「零文案直发模式」：Title 与 Caption 直接留空不填（避免黑底文字遮挡底部红圈价格）</div>`
+    : `<div class="step-label">📋 第二步：复制标题与正文</div>
+       <div class="copy-box">
+         <div class="copy-hdr">📌 Title（标题）</div>
+         <div class="copy-txt">${esc(it.title || '(无标题)')}</div>
+       </div>
+       <button class="btn btn-blue" onclick="copyItemField('${keyJs}', 'title', 'Title 标题')">📋 一键复制 Title 标题</button>
+       <div class="copy-box">
+         <div class="copy-hdr">📝 Caption（正文 + 标签）</div>
+         <div class="copy-txt">${esc(it.caption || '(零正文)')}</div>
+       </div>
+       <button class="btn btn-slate" onclick="copyItemField('${keyJs}', 'caption', 'Caption 正文')">📋 一键复制 Caption 正文</button>`;
+
+  return `<div class="card ${it.published ? 'is-done' : ''}" id="card-${esc(domId)}" data-item-key="${esc(key)}">
+    <div class="prod-top">
+      <div class="prod-name">${esc(it.cn_name)}</div>
+      <button class="btn-del" onclick="reportAction('${keyJs}', 'dismiss')">移出列表 ×</button>
+    </div>
+    <div class="prod-meta">
+      <span class="tag">PID: ${esc(it.pid)}</span>
+      <span class="tag tag-green">${esc(itemVariant(it).toUpperCase())} (${it.slide_names.length}张)</span>
+      ${it.queued_at ? `<span class="tag">派单 ${esc(it.queued_at)}</span>` : ''}
+      ${it.published ? `<span class="tag tag-green" data-pub-tag="1">✅ 本号已登记发帖</span>` : ''}
+    </div>
+
+    ${tspBtn ? `<div class="step-label">🛒 橱窗挂车（若尚未加橱窗）</div>${tspBtn}` : ''}
+
+    <div class="step-label">📸 第一步：存无损原图进系统相册</div>
+    <div class="preload-bar" id="preload-status-${esc(domId)}">${isPreloaded ? `✅ ${it.slide_names.length} 张无损高清原图已就绪` : '💤 滑动到此自动预加载，或直接点下方按钮'}</div>
+    <button id="save-btn-${esc(domId)}" class="btn btn-primary" onclick="saveAllSlides('${keyJs}')">📥 一键存全套 ${it.slide_names.length} 张图到系统相册</button>
+    <div class="help-tip">点上方红按钮 → 弹出菜单点 <b>「存储 ${it.slide_names.length} 张图像」</b> 按顺序一次全进相册（也可长按下方单图存）</div>
+    <div class="slides-strip">${thumbs}</div>
+
+    ${copySection}
+
+    <div class="help-tip" style="margin-bottom:12px;">🎵 <b>防静音铁律</b>：进 TikTok 选好图后，<b>先挂橙色小黄车，最后再去顶部搜商用音乐</b>。</div>
+
+    <button class="btn btn-green" data-pub-btn="1" onclick="reportAction('${keyJs}', 'publish')">
+      ${it.published ? '✅ 已登记发帖（电脑总控台已同步）' : '✅ 我已在手机发完帖（同步回电脑工作台）'}
+    </button>
+  </div>`;
+}
+
+function ensurePreloadObserver() {
+  if (!preloadObserver && ("IntersectionObserver" in window)) {
+    preloadObserver = new IntersectionObserver((entries, obs) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          const k = entry.target.getAttribute("data-item-key");
+          obs.unobserve(entry.target);
+          if (k) schedulePreload(k);
+        }
+      }
+    }, { rootMargin: "260px 0px" });
+  }
+  return preloadObserver;
+}
+
+function appendRefilledItems(newItems) {
+  if (!Array.isArray(newItems) || !newItems.length) return 0;
+  const existingKeys = new Set(ITEMS.map(itemKey));
+  const fresh = newItems.filter(it => it && !existingKeys.has(itemKey(it)));
+  if (!fresh.length) return 0;
+
+  if (!ITEMS.length) {
+    ITEMS = fresh;
+    updateConnSub();
+    renderItems();
+    return fresh.length;
+  }
+
+  const pendingBefore = ITEMS.filter(x => !x.published).length;
+  ITEMS = ITEMS.concat(fresh);
+  const root = document.getElementById("app");
+  if (root) {
+    root.insertAdjacentHTML("beforeend", fresh.map(renderCardHtml).join(""));
+    const obs = ensurePreloadObserver();
+    let immediateNeed = Math.max(0, 2 - pendingBefore);
+    for (const it of fresh) {
+      const k = itemKey(it);
+      if (immediateNeed > 0 && !it.published) {
+        immediateNeed--;
+        schedulePreload(k);
+        continue;
+      }
+      const el = document.getElementById(`card-${domIdOfKey(k)}`);
+      if (el && obs) obs.observe(el);
+      else if (!obs && !it.published) schedulePreload(k);
+    }
+  }
+  updateConnSub();
+  return fresh.length;
 }
 
 function renderItems() {
@@ -443,74 +571,7 @@ function renderItems() {
     </div>`;
     return;
   }
-  root.innerHTML = ITEMS.map((it) => {
-    const key = itemKey(it);
-    const keyJs = esc(escJs(key));
-    const domId = domIdOfKey(key);
-    const isPreloaded = !!(preloadedFiles[key] && preloadedFiles[key].length);
-    const fallbackUrl = (it.tsp && it.tsp.share_url) ? it.tsp.share_url : (`${BASE_TUNNEL}/go_showcase/${encodeURIComponent(it.pid)}`);
-    const isRealTsp = !!(it.tsp && it.tsp.share_url && it.tsp.is_tsp !== false);
-    const tspBtn = isRealTsp
-      ? `<a class="btn btn-amber" href="${esc(it.tsp.share_url)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">
-           💎 未挂车点此：直跳 TSP 高佣加橱窗 (${esc(it.tsp.partner_commission)}%+${esc(it.tsp.creator_commission)}%)
-         </a>`
-      : `<a class="btn btn-amber" href="${esc(fallbackUrl)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">
-           🛒 未挂车点此：直跳 TikTok 达人加橱窗 (非TSP公开计划)
-         </a>`;
-    const thumbs = it.slide_names.map((sn, sIdx) => {
-      const rawUrl = `${BASE_TUNNEL}/raw/${encodeURIComponent(it.pid)}/${encodeURIComponent(itemVariant(it))}/${encodeURIComponent(sn)}?k=${encodeURIComponent(SECRET)}`;
-      return `<div class="slide-thumb-wrap">
-        <img src="${rawUrl}" loading="lazy" alt="P${sIdx+1}">
-        <div class="slide-cap">P${sIdx+1} (${it.slide_sizes_kb[sIdx]}KB)</div>
-      </div>`;
-    }).join("");
-
-    const hasTitle = !!(it.title || "").trim();
-    const hasCaption = !!(it.caption || "").trim();
-    const copySection = (!hasTitle && !hasCaption)
-      ? `<div class="step-label">📋 第二步：发布文案说明</div>
-         <div class="zero-copy-hint">✨ 本套为「零文案直发模式」：Title 与 Caption 直接留空不填（避免黑底文字遮挡底部红圈价格）</div>`
-      : `<div class="step-label">📋 第二步：复制标题与正文</div>
-         <div class="copy-box">
-           <div class="copy-hdr">📌 Title（标题）</div>
-           <div class="copy-txt">${esc(it.title || '(无标题)')}</div>
-         </div>
-         <button class="btn btn-blue" onclick="copyItemField('${keyJs}', 'title', 'Title 标题')">📋 一键复制 Title 标题</button>
-         <div class="copy-box">
-           <div class="copy-hdr">📝 Caption（正文 + 标签）</div>
-           <div class="copy-txt">${esc(it.caption || '(零正文)')}</div>
-         </div>
-         <button class="btn btn-slate" onclick="copyItemField('${keyJs}', 'caption', 'Caption 正文')">📋 一键复制 Caption 正文</button>`;
-
-    return `<div class="card ${it.published ? 'is-done' : ''}" id="card-${esc(domId)}" data-item-key="${esc(key)}">
-      <div class="prod-top">
-        <div class="prod-name">${esc(it.cn_name)}</div>
-        <button class="btn-del" onclick="reportAction('${keyJs}', 'dismiss')">移出列表 ×</button>
-      </div>
-      <div class="prod-meta">
-        <span class="tag">PID: ${esc(it.pid)}</span>
-        <span class="tag tag-green">${esc(itemVariant(it).toUpperCase())} (${it.slide_names.length}张)</span>
-        ${it.queued_at ? `<span class="tag">派单 ${esc(it.queued_at)}</span>` : ''}
-        ${it.published ? `<span class="tag tag-green" data-pub-tag="1">✅ 本号已登记发帖</span>` : ''}
-      </div>
-
-      ${tspBtn ? `<div class="step-label">🛒 橱窗挂车（若尚未加橱窗）</div>${tspBtn}` : ''}
-
-      <div class="step-label">📸 第一步：存无损原图进系统相册</div>
-      <div class="preload-bar" id="preload-status-${esc(domId)}">${isPreloaded ? `✅ ${it.slide_names.length} 张无损高清原图已就绪` : '💤 滑动到此自动预加载，或直接点下方按钮'}</div>
-      <button id="save-btn-${esc(domId)}" class="btn btn-primary" onclick="saveAllSlides('${keyJs}')">📥 一键存全套 ${it.slide_names.length} 张图到系统相册</button>
-      <div class="help-tip">点上方红按钮 → 弹出菜单点 <b>「存储 ${it.slide_names.length} 张图像」</b> 按顺序一次全进相册（也可长按下方单图存）</div>
-      <div class="slides-strip">${thumbs}</div>
-
-      ${copySection}
-
-      <div class="help-tip" style="margin-bottom:12px;">🎵 <b>防静音铁律</b>：进 TikTok 选好图后，<b>先挂橙色小黄车，最后再去顶部搜商用音乐</b>。</div>
-
-      <button class="btn btn-green" data-pub-btn="1" onclick="reportAction('${keyJs}', 'publish')">
-        ${it.published ? '✅ 已登记发帖（电脑总控台已同步）' : '✅ 我已在手机发完帖（同步回电脑工作台）'}
-      </button>
-    </div>`;
-  }).join("");
+  root.innerHTML = ITEMS.map(renderCardHtml).join("");
 
   const initKeys = new Set();
   for (let i = 0; i < ITEMS.length; i++) {
@@ -527,18 +588,10 @@ function renderItems() {
   });
 
   if (remainingCards.length) {
-    if ("IntersectionObserver" in window) {
-      preloadObserver = new IntersectionObserver((entries, obs) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const k = entry.target.getAttribute("data-item-key");
-            obs.unobserve(entry.target);
-            if (k) schedulePreload(k);
-          }
-        }
-      }, { rootMargin: "260px 0px" });
+    const obs = ensurePreloadObserver();
+    if (obs) {
       for (const el of remainingCards) {
-        preloadObserver.observe(el);
+        obs.observe(el);
       }
     } else {
       for (const el of remainingCards) {
@@ -622,6 +675,9 @@ async function boot() {
     ITEMS = qData.items || [];
     updateConnSub();
     renderItems();
+    if (Number(qData.refilled_count || 0) > 0) {
+      showToast(`⚡ 队列不足，已自动补货 +${qData.refilled_count} 套！`);
+    }
   } catch (err) {
     sub.textContent = "🔴 电脑总控台未在线";
     root.innerHTML = `<div class="card">
