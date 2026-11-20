@@ -302,19 +302,19 @@
       <div class="hook-text-toggle-row">
         <span class="hook-text-toggle-lbl">静图版本开关：</span>
         <div class="hook-seg-switch" role="group" aria-label="钩子图有无字开关">
-          <button type="button" id="btnTextModeClean" class="hook-seg-btn active" onclick="setHookTextMode('clean')">✂️ 无字底图(23)</button>
-          <button type="button" id="btnTextModeOrig" class="hook-seg-btn" onclick="setHookTextMode('original')">🔤 原版带字(40)</button>
+          <button type="button" id="btnTextModeClean" class="hook-seg-btn active" onclick="setHookTextMode('clean')">✂️ 无字底图(34)</button>
+          <button type="button" id="btnTextModeOrig" class="hook-seg-btn" onclick="setHookTextMode('original')">🔤 原版带字(54)</button>
         </div>
       </div>
       <div id="hookPoolSelectedBar" class="hook-selected-bar">
         <div class="hook-sel-left">
-          <div class="hook-sel-text">🎲 当前首图：智能随机（23张无字底图轮换）</div>
+          <div class="hook-sel-text">🎲 当前首图：智能随机（34张无字底图轮换）</div>
         </div>
       </div>
       <div class="hook-subfilter">
-        <button type="button" class="hook-pill active" data-hook-filter="all" onclick="setHookPoolFilter('all')">全部(33)</button>
-        <button type="button" class="hook-pill" data-hook-filter="static" onclick="setHookPoolFilter('static')">🔥 无字静图(23)</button>
-        <button type="button" class="hook-pill" data-hook-filter="dynamic" onclick="setHookPoolFilter('dynamic')">✨ 带字动态模板(10)</button>
+        <button type="button" class="hook-pill active" data-hook-filter="all" onclick="setHookPoolFilter('all')">全部(58)</button>
+        <button type="button" class="hook-pill" data-hook-filter="static" onclick="setHookPoolFilter('static')">🔥 无字静图(34)</button>
+        <button type="button" class="hook-pill" data-hook-filter="dynamic" onclick="setHookPoolFilter('dynamic')">✨ 带字动态模板(24)</button>
         <button type="button" id="btnExpandHookGrid" class="hook-mini-btn" style="margin-left:auto;" onclick="toggleHookGridExpand()">⤢ 展开看全部</button>
         <button type="button" class="hook-mini-btn" onclick="loadHookPool(true)">🔄 刷新池</button>
       </div>
@@ -437,8 +437,8 @@ function findHookInfoById(hookId) {
 function syncHookTextToggleUi() {
   const cleanBtn = document.getElementById("btnTextModeClean");
   const origBtn = document.getElementById("btnTextModeOrig");
-  const cleanCnt = (HOOK_POOL_DATA && Array.isArray(HOOK_POOL_DATA.static_hooks)) ? HOOK_POOL_DATA.static_hooks.length : 23;
-  const origCnt = (HOOK_POOL_DATA && Array.isArray(HOOK_POOL_DATA.static_hooks_original)) ? HOOK_POOL_DATA.static_hooks_original.length : 40;
+  const cleanCnt = (HOOK_POOL_DATA && Array.isArray(HOOK_POOL_DATA.static_hooks)) ? HOOK_POOL_DATA.static_hooks.length : 34;
+  const origCnt = (HOOK_POOL_DATA && Array.isArray(HOOK_POOL_DATA.static_hooks_original)) ? HOOK_POOL_DATA.static_hooks_original.length : 54;
   if (cleanBtn) {
     cleanBtn.classList.toggle("active", hookTextMode === "clean");
     cleanBtn.textContent = `✂️ 无字底图(${cleanCnt})`;
@@ -452,9 +452,9 @@ function syncHookTextToggleUi() {
     const stCnt = getActiveStaticHooks().length;
     const dyCnt = (HOOK_POOL_DATA.dynamic_hooks || []).length;
     if (hookTextMode === "original") {
-      hint.textContent = `${stCnt}张原版带字 + ${dyCnt}套动态 (${HOOK_POOL_DATA.family_count_original || 28}家族)`;
+      hint.textContent = `${stCnt}张原版带字 + ${dyCnt}套动态 (${HOOK_POOL_DATA.family_count_original || 54}家族)`;
     } else {
-      hint.textContent = `${stCnt}张无字静图 + ${dyCnt}套带字动态 (${HOOK_POOL_DATA.family_count || 23}类)`;
+      hint.textContent = `${stCnt}张无字静图 + ${dyCnt}套带字动态 (${HOOK_POOL_DATA.family_count || 54}类)`;
     }
   }
 }
@@ -536,9 +536,12 @@ function renderHookSelectedBar() {
   const bar = document.getElementById("hookPoolSelectedBar");
   if (!bar) return;
   if (!selectedPoolHookId) {
+    const cleanLen = (HOOK_POOL_DATA && Array.isArray(HOOK_POOL_DATA.static_hooks)) ? HOOK_POOL_DATA.static_hooks.length : 34;
+    const origLen = (HOOK_POOL_DATA && Array.isArray(HOOK_POOL_DATA.static_hooks_original)) ? HOOK_POOL_DATA.static_hooks_original.length : 54;
+    const dynLen = (HOOK_POOL_DATA && Array.isArray(HOOK_POOL_DATA.dynamic_hooks)) ? HOOK_POOL_DATA.dynamic_hooks.length : 24;
     const randDesc = hookTextMode === "original"
-      ? "🎲 当前首图：智能随机（40张原版带字+10动态轮换）"
-      : "🎲 当前首图：智能随机（23张无字底图轮换）";
+      ? `🎲 当前首图：智能随机（${origLen}张原版带字+${dynLen}动态轮换）`
+      : `🎲 当前首图：智能随机（${cleanLen}张无字底图轮换）`;
     bar.innerHTML = `<div class="hook-sel-left">
       <div class="hook-sel-text">${randDesc}</div>
     </div>`;
