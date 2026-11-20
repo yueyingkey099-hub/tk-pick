@@ -473,9 +473,68 @@ const GIST_ID = "c21cd7cb2d9b00fd8756b6542d97bcb8";
 let ACCT = "";
 let BASE_TUNNEL = "";
 let OVERRIDE_TUNNEL = "";
-let SECRET = "";
+let LEGACY_SECRET = "";
+let TEAM_TOKEN = (() => { try { return (localStorage.getItem("tk_pick_team_token") || "").trim(); } catch (e) { return ""; } })();
+let ADMIN_TOKEN = (() => { try { return (localStorage.getItem("tk_pick_admin_token") || "").trim(); } catch (e) { return ""; } })();
+let CURRENT_ROLE = "";
+let AUTH_STATE = { protected_accounts: ["240", "417"], allow_legacy_static_secret: true };
 let LAST_SERVER_TIME = "";
 let ITEMS = [];
+
+function activeToken() {
+  return ADMIN_TOKEN || TEAM_TOKEN || "";
+}
+function hasAnyAuth() {
+  return !!(activeToken() || LEGACY_SECRET);
+}
+function authHeaders(extra) {
+  const tok = activeToken();
+  return tok ? Object.assign({}, extra || {}, { Authorization: "Bearer " + tok }) : Object.assign({}, extra || {});
+}
+function apiUrl(pathAndQuery) {
+  if (!activeToken() && LEGACY_SECRET) {
+    const sep = pathAndQuery.includes("?") ? "&" : "?";
+    return `${BASE_TUNNEL}${pathAndQuery}${sep}k=${encodeURIComponent(LEGACY_SECRET)}`;
+  }
+  return `${BASE_TUNNEL}${pathAndQuery}`;
+}
+function imgAuthUrl(pathAndQuery) {
+  const tok = activeToken();
+  const sep = pathAndQuery.includes("?") ? "&" : "?";
+  if (tok) return `${BASE_TUNNEL}${pathAndQuery}${sep}tok=${encodeURIComponent(tok)}`;
+  if (LEGACY_SECRET) return `${BASE_TUNNEL}${pathAndQuery}${sep}k=${encodeURIComponent(LEGACY_SECRET)}`;
+  return `${BASE_TUNNEL}${pathAndQuery}`;
+}
+function clearStoredTokens(scope) {
+  try {
+    if (!scope || scope === "admin") {
+      ADMIN_TOKEN = "";
+      localStorage.removeItem("tk_pick_admin_token");
+    }
+    if (!scope || scope === "team") {
+      TEAM_TOKEN = "";
+      localStorage.removeItem("tk_pick_team_token");
+    }
+  } catch (e) {}
+}
+function handleAuthFailureResp(resp, data) {
+  if (!resp) return false;
+  if (resp.status === 401) {
+    clearStoredTokens("team");
+    clearStoredTokens("admin");
+    if (data && data.reason === "legacy_secret_disabled") {
+      LEGACY_SECRET = "";
+    }
+    renderAuthGate("team", (data && data.message) || "请输入团队访问密码（记住 30 天）");
+    return true;
+  }
+  if (resp.status === 403 && data && data.error === "need_admin_auth") {
+    clearStoredTokens("admin");
+    renderAuthGate("admin", data.message || `🛡️ ${ACCT || "该"} 号机为受保护精品号，请输入管理员口令`);
+    return true;
+  }
+  return false;
+}
 const preloadedFiles = {};
 const preloadPromises = {};
 let preloadObserver = null;
@@ -523,12 +582,12 @@ function formatViewsShort(n) {
 }
 
 function hookThumbUrl(hookId, full = false) {
-  if (!BASE_TUNNEL || !SECRET || !hookId) return "";
+  if (!BASE_TUNNEL || !hasAnyAuth() || !hookId) return "";
   const isStatic = /^H\d{3,}$/.test(hookId);
   const modeQ = isStatic
     ? `&variant=${encodeURIComponent(hookTextMode)}&v=${hookTextMode === "original" ? "orig1" : "clean2"}`
     : "";
-  return `${BASE_TUNNEL}/api/hook_thumb/${encodeURIComponent(hookId)}?k=${encodeURIComponent(SECRET)}${full ? "&full=1" : ""}${modeQ}`;
+  return imgAuthUrl(`/api/hook_thumb/${encodeURIComponent(hookId)}?${full ? "full=1" : "full=0"}${modeQ}`);
 }
 
 function findHookInfoById(hookId) {
@@ -835,7 +894,7 @@ function renderRecentUploads() {
 }
 
 async function loadHookPool(forceRefresh = false) {
-  if (!BASE_TUNNEL || !SECRET || HOOK_POOL_LOADING) return;
+  if (!BASE_TUNNEL || !hasAnyAuth() || HOOK_POOL_LOADING) return;
   if (HOOK_POOL_DATA && !forceRefresh) {
     syncHookTextToggleUi();
     renderHookSelectedBar();
@@ -848,8 +907,12 @@ async function loadHookPool(forceRefresh = false) {
   const hint = document.getElementById("hookPoolSummaryHint");
   if (hint) hint.textContent = "正在加载爆款库...";
   try {
-    const resp = await fetch(`${BASE_TUNNEL}/api/hook_pool?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`, { cache: "no-store" });
+    const resp = await fetch(apiUrl(`/api/hook_pool?t=${Date.now()}`), {
+      cache: "no-store",
+      headers: authHeaders()
+    });
     const data = await resp.json();
+    if (handleAuthFailureResp(resp, data)) return;
     if (!resp.ok || !data.ok) throw new Error(data.error || ("HTTP " + resp.status));
     HOOK_POOL_DATA = data;
     syncHookTextToggleUi();
@@ -967,7 +1030,7 @@ function renderImportPreviewStrip() {
   strip.innerHTML = slides.map(s => {
     const pg = Number(s.page || 1);
     const sel = pg === curPage;
-    const sUrl = `${BASE_TUNNEL}/api/hook_import_slide/${encodeURIComponent(hookImportPreviewId)}/${pg}?k=${encodeURIComponent(SECRET)}`;
+    const sUrl = imgAuthUrl(`/api/hook_import_slide/${encodeURIComponent(hookImportPreviewId)}/${pg}`);
     return `<div class="hook-import-slide ${sel ? 'selected' : ''}" onclick="selectImportPreviewPage(${pg})">
       <div class="hook-import-slide-badge">P${pg}${sel ? ' ✓' : ''}</div>
       <img src="${sUrl}" loading="lazy" alt="第${pg}页">
@@ -989,8 +1052,8 @@ function selectImportPreviewPage(pageNum) {
 
 async function previewTikTokHookUrl() {
   if (hookImportBusy) return;
-  if (!BASE_TUNNEL || !SECRET) {
-    showToast("⚠️ 请先连上电脑总控台", "#f59e0b");
+  if (!BASE_TUNNEL || !hasAnyAuth()) {
+    showToast("⚠️ 请先连上电脑总控台并完成密码验证", "#f59e0b");
     return;
   }
   const urlInp = document.getElementById("hookImportUrl");
@@ -1002,12 +1065,13 @@ async function previewTikTokHookUrl() {
   setHookImportBusy(true);
   setHookImportMessage("⏳ 正在解析目标图文各页图片...", "#93c5fd");
   try {
-    const resp = await fetch(`${BASE_TUNNEL}/api/hook_import_preview?k=${encodeURIComponent(SECRET)}`, {
+    const resp = await fetch(apiUrl("/api/hook_import_preview"), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ url: rawUrl })
     });
     const data = await resp.json();
+    if (handleAuthFailureResp(resp, data)) return;
     if (!resp.ok || !data.ok) {
       throw new Error(data.error || ("HTTP " + resp.status));
     }
@@ -1034,8 +1098,8 @@ async function previewTikTokHookUrl() {
 
 async function addTikTokHookToPool() {
   if (hookImportBusy) return;
-  if (!BASE_TUNNEL || !SECRET) {
-    showToast("⚠️ 请先连上电脑总控台", "#f59e0b");
+  if (!BASE_TUNNEL || !hasAnyAuth()) {
+    showToast("⚠️ 请先连上电脑总控台并完成密码验证", "#f59e0b");
     return;
   }
   const urlInp = document.getElementById("hookImportUrl");
@@ -1055,9 +1119,9 @@ async function addTikTokHookToPool() {
   setHookImportBusy(true);
   setHookImportMessage(`⏳ 正在提取第 ${pageVal} 页无水印原图并入池...`, "#93c5fd");
   try {
-    const resp = await fetch(`${BASE_TUNNEL}/api/hook_import_add?k=${encodeURIComponent(SECRET)}`, {
+    const resp = await fetch(apiUrl("/api/hook_import_add"), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         url: rawUrl,
         page: pageVal,
@@ -1067,6 +1131,7 @@ async function addTikTokHookToPool() {
       })
     });
     const data = await resp.json();
+    if (handleAuthFailureResp(resp, data)) return;
     if (!resp.ok || !data.ok || !data.hook) {
       throw new Error(data.error || ("HTTP " + resp.status));
     }
@@ -1100,15 +1165,16 @@ async function addTikTokHookToPool() {
 
 async function deleteCustomHookFromLightbox() {
   const targetId = lightboxHookId;
-  if (!targetId || !BASE_TUNNEL || !SECRET) return;
+  if (!targetId || !BASE_TUNNEL || !hasAnyAuth()) return;
   if (!confirm("确定从爆款钩子池移出这张链接导入的钩子图？")) return;
   try {
-    const resp = await fetch(`${BASE_TUNNEL}/api/hook_import_delete?k=${encodeURIComponent(SECRET)}`, {
+    const resp = await fetch(apiUrl("/api/hook_import_delete"), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ hook_id: targetId })
     });
     const data = await resp.json();
+    if (handleAuthFailureResp(resp, data)) { closeHookLightbox(); return; }
     if (!resp.ok || !data.ok) {
       throw new Error(data.error || ("HTTP " + resp.status));
     }
@@ -1306,12 +1372,16 @@ function stopSelfPolling() {
 
 async function pollSelfTask(taskId) {
   stopSelfPolling();
-  if (!taskId || !BASE_TUNNEL || !SECRET) return;
+  if (!taskId || !BASE_TUNNEL || !hasAnyAuth()) return;
   selfActiveTaskId = taskId;
   const btn = document.getElementById("selfSubmitBtn");
   try {
-    const resp = await fetch(`${BASE_TUNNEL}/api/self_task/${encodeURIComponent(taskId)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`, { cache: "no-store" });
+    const resp = await fetch(apiUrl(`/api/self_task/${encodeURIComponent(taskId)}?t=${Date.now()}`), {
+      cache: "no-store",
+      headers: authHeaders()
+    });
     const data = await resp.json();
+    if (handleAuthFailureResp(resp, data)) return;
     if (!resp.ok || !data.ok || !data.task) {
       throw new Error(data.error || ("HTTP " + resp.status));
     }
@@ -1338,8 +1408,8 @@ async function pollSelfTask(taskId) {
 }
 
 async function submitSelfPids() {
-  if (!ACCT || !SECRET || !BASE_TUNNEL) {
-    showToast("⚠️ 请先连上电脑总控台再提交", "#f59e0b");
+  if (!ACCT || !hasAnyAuth() || !BASE_TUNNEL) {
+    showToast("⚠️ 请先连上电脑总控台并完成密码验证", "#f59e0b");
     return;
   }
   const inp = document.getElementById("selfPidInput");
@@ -1367,9 +1437,9 @@ async function submitSelfPids() {
   const btn = document.getElementById("selfSubmitBtn");
   if (btn) btn.disabled = true;
   try {
-    const resp = await fetch(`${BASE_TUNNEL}/api/self_submit?k=${encodeURIComponent(SECRET)}`, {
+    const resp = await fetch(apiUrl("/api/self_submit"), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         account_key: ACCT,
         raw_text: rawText,
@@ -1380,6 +1450,10 @@ async function submitSelfPids() {
       })
     });
     const data = await resp.json();
+    if (handleAuthFailureResp(resp, data)) {
+      if (btn) btn.disabled = false;
+      return;
+    }
     if (!resp.ok || !data.ok || !data.task) {
       if (btn) btn.disabled = false;
       const box = document.getElementById("selfTaskBox");
@@ -1409,9 +1483,12 @@ async function submitSelfPids() {
 }
 
 async function resumeActiveSelfTasks() {
-  if (!ACCT || !SECRET || !BASE_TUNNEL) return;
+  if (!ACCT || !hasAnyAuth() || !BASE_TUNNEL) return;
   try {
-    const resp = await fetch(`${BASE_TUNNEL}/api/self_tasks/${encodeURIComponent(ACCT)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`, { cache: "no-store" });
+    const resp = await fetch(apiUrl(`/api/self_tasks/${encodeURIComponent(ACCT)}?t=${Date.now()}`), {
+      cache: "no-store",
+      headers: authHeaders()
+    });
     if (!resp.ok) return;
     const data = await resp.json();
     const list = (data && data.tasks) || [];
@@ -1485,17 +1562,15 @@ function resolveIdentity() {
     }
   } catch (e) {}
 
-  if (acct && tok) {
-    try {
-      const targetUrl = `?acct=${encodeURIComponent(acct)}#${tok}`;
-      if (location.search !== `?acct=${encodeURIComponent(acct)}` || location.hash !== `#${tok}`) {
-        history.replaceState(null, "", targetUrl);
-      }
-    } catch (e) {}
-  }
+  try {
+    const cleanSearch = acct ? `?acct=${encodeURIComponent(acct)}` : "";
+    if (location.search !== cleanSearch || location.hash) {
+      history.replaceState(null, "", location.pathname + cleanSearch);
+    }
+  } catch (e) {}
 
   ACCT = acct;
-  SECRET = tok;
+  LEGACY_SECRET = tok;
   applyBranding();
 }
 
@@ -1520,13 +1595,7 @@ function bindManualAcct() {
   ACCT = clean;
   try {
     localStorage.setItem("tk_pick_last_acct", ACCT);
-    if (SECRET) {
-      localStorage.setItem("tk_pick_k_" + ACCT, SECRET);
-      localStorage.setItem("tk_pick_k", SECRET);
-      history.replaceState(null, "", `?acct=${encodeURIComponent(ACCT)}#${SECRET}`);
-    } else {
-      history.replaceState(null, "", `?acct=${encodeURIComponent(ACCT)}`);
-    }
+    history.replaceState(null, "", location.pathname + `?acct=${encodeURIComponent(ACCT)}`);
   } catch (e) {}
   applyBranding();
   boot();
@@ -1587,8 +1656,8 @@ function preloadItemSlides(item) {
         if (statusEl) {
           statusEl.textContent = `⚡ 正在预加载无损原图 (${i+1}/${item.slide_names.length})...`;
         }
-        const url = `${BASE_TUNNEL}/raw/${encodeURIComponent(item.pid)}/${encodeURIComponent(itemVariant(item))}/${encodeURIComponent(sname)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`;
-        const resp = await fetch(url, { cache: "no-store" });
+        const url = apiUrl(`/raw/${encodeURIComponent(item.pid)}/${encodeURIComponent(itemVariant(item))}/${encodeURIComponent(sname)}?t=${Date.now()}`);
+        const resp = await fetch(url, { cache: "no-store", headers: authHeaders() });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
         const blob = await resp.blob();
         files.push(new File([blob], `${item.pid}_${itemVariant(item)}_${String(i+1).padStart(2,"0")}.jpg`, { type: "image/jpeg" }));
@@ -1663,12 +1732,13 @@ async function reportAction(key, action) {
   const item = getItemByKey(key);
   if (!item) return;
   try {
-    const resp = await fetch(`${BASE_TUNNEL}/api/mark?k=${encodeURIComponent(SECRET)}`, {
+    const resp = await fetch(apiUrl("/api/mark"), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ account_key: ACCT, pid: item.pid, variant_id: item.variant_id, action })
     });
     const res = await resp.json();
+    if (handleAuthFailureResp(resp, res)) return;
     if (res.ok) {
       const domId = domIdOfKey(key);
       const cardEl = document.getElementById(`card-${domId}`);
@@ -1736,7 +1806,7 @@ function renderCardHtml(it) {
          🛒 未挂车点此：直跳 TikTok 达人加橱窗 (非TSP公开计划)
        </a>`;
   const thumbs = it.slide_names.map((sn, sIdx) => {
-    const rawUrl = `${BASE_TUNNEL}/raw/${encodeURIComponent(it.pid)}/${encodeURIComponent(itemVariant(it))}/${encodeURIComponent(sn)}?k=${encodeURIComponent(SECRET)}`;
+    const rawUrl = imgAuthUrl(`/raw/${encodeURIComponent(it.pid)}/${encodeURIComponent(itemVariant(it))}/${encodeURIComponent(sn)}`);
     return `<div class="slide-thumb-wrap">
       <img src="${rawUrl}" loading="lazy" alt="P${sIdx+1}">
       <div class="slide-cap">P${sIdx+1} (${it.slide_sizes_kb[sIdx]}KB)</div>
@@ -1921,23 +1991,106 @@ async function resolveTunnelUrl() {
   return rawUrl;
 }
 
+function renderAuthGate(scope, reasonMsg) {
+  toggleSelfDrawer(false);
+  const selfBtn = document.getElementById("btnToggleSelf");
+  if (selfBtn) selfBtn.style.display = "none";
+  const sub = document.getElementById("connSub");
+  const root = document.getElementById("app");
+  const isAdmin = scope === "admin";
+  if (sub) sub.textContent = isAdmin ? `🛡️ ${ACCT || "精品"} 号机已锁定` : "🔐 等待输入团队访问密码";
+  if (!root) return;
+  const titleTxt = isAdmin ? `🛡️ ${esc(ACCT)} 号机受保护 · 需管理员口令` : "🔐 请输入团队访问密码";
+  const hintTxt = reasonMsg
+    ? esc(reasonMsg)
+    : (isAdmin ? "精品号独立隔离，仅管理员可访问。验证后本机自动记住 30 天。" : "首次打开或密码更新后输一次即可，自动记住 30 天，地址栏不暴露任何密钥。");
+  root.innerHTML = `<div class="card">
+    <div class="prod-name">${titleTxt}</div>
+    <div class="help-tip" style="margin-top:8px;">${hintTxt}</div>
+    <input id="authPwInput" type="password" class="acct-input" placeholder="${isAdmin ? "请输入管理员口令" : "请输入团队访问密码"}" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitPhoneLogin('${isAdmin ? "admin" : "team"}')" />
+    <div id="authGateErr" style="display:none; color:#fca5a5; font-size:12.5px; font-weight:700; margin-bottom:10px;"></div>
+    <button id="authSubmitBtn" class="btn btn-primary" onclick="submitPhoneLogin('${isAdmin ? "admin" : "team"}')">🔓 验证并加载待领套图</button>
+    ${isAdmin ? `<div style="margin-top:8px; text-align:center;"><button type="button" class="hook-mini-btn" onclick="logoutPhoneAuth()">切回其他手机</button></div>` : ""}
+  </div>`;
+  const inp = document.getElementById("authPwInput");
+  if (inp) setTimeout(() => inp.focus(), 60);
+}
+
+async function submitPhoneLogin(scope) {
+  const inp = document.getElementById("authPwInput");
+  const btn = document.getElementById("authSubmitBtn");
+  const errEl = document.getElementById("authGateErr");
+  const pw = (inp ? inp.value : "").trim();
+  if (!pw) {
+    if (errEl) { errEl.style.display = "block"; errEl.textContent = "请输入密码"; }
+    return;
+  }
+  if (!BASE_TUNNEL) {
+    try { BASE_TUNNEL = await resolveTunnelUrl(); } catch (e) {}
+  }
+  if (!BASE_TUNNEL) {
+    if (errEl) { errEl.style.display = "block"; errEl.textContent = "暂未连上电脑安全隧道，请稍后重试"; }
+    return;
+  }
+  if (btn) btn.disabled = true;
+  if (errEl) errEl.style.display = "none";
+  try {
+    const resp = await fetch(`${BASE_TUNNEL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pw, scope: scope === "admin" ? "admin" : "team", remember_days: 30 })
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok || !data.token) {
+      if (errEl) {
+        errEl.style.display = "block";
+        errEl.textContent = data.message || data.error || ("验证失败 HTTP " + resp.status);
+      }
+      return;
+    }
+    try {
+      if (data.role === "admin") {
+        ADMIN_TOKEN = data.token;
+        localStorage.setItem("tk_pick_admin_token", ADMIN_TOKEN);
+      } else {
+        TEAM_TOKEN = data.token;
+        localStorage.setItem("tk_pick_team_token", TEAM_TOKEN);
+      }
+      localStorage.removeItem("tk_pick_k");
+      if (ACCT) localStorage.removeItem("tk_pick_k_" + ACCT);
+    } catch (e) {}
+    LEGACY_SECRET = "";
+    showToast(data.role === "admin" ? "🛡️ 管理员验证通过！" : "✅ 团队密码验证通过！");
+    boot();
+  } catch (err) {
+    if (errEl) { errEl.style.display = "block"; errEl.textContent = "网络请求失败：" + (err.message || ""); }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function logoutPhoneAuth() {
+  clearStoredTokens("admin");
+  clearStoredTokens("team");
+  LEGACY_SECRET = "";
+  ITEMS = [];
+  renderAuthGate("team", "已退出当前授权，请输入访问密码");
+}
+
 async function boot() {
   resolveIdentity();
   const sub = document.getElementById("connSub");
   const root = document.getElementById("app");
+  const selfBtn = document.getElementById("btnToggleSelf");
   if (!ACCT) {
+    if (selfBtn) selfBtn.style.display = "none";
     sub.textContent = "等待绑定手机编号";
     root.innerHTML = `<div class="card">
       <div class="prod-name">📱 首次打开：请输入本台手机编号</div>
-      <div class="help-tip" style="margin-top:8px;">输入后将自动保存并绑定到本机浏览器（如 <code>53</code>、<code>36</code>、<code>A01</code>）。</div>
-      <input id="manualAcctInput" class="acct-input" placeholder="输入手机编号，例如 53" autocomplete="off" />
+      <div class="help-tip" style="margin-top:8px;">输入后将自动保存并绑定到本机浏览器（如 <code>21</code>、<code>15</code>、<code>240</code>）。</div>
+      <input id="manualAcctInput" class="acct-input" placeholder="输入手机编号，例如 21" autocomplete="off" />
       <button class="btn btn-primary" onclick="bindManualAcct()">✅ 确认绑定并加载待领套图</button>
     </div>`;
-    return;
-  }
-  if (!SECRET) {
-    sub.textContent = "缺少绑定密钥";
-    root.innerHTML = `<div class="card"><div class="prod-name">🔒 请用手机相机扫一次电脑「全矩阵永久远程领料码」面板生成的专属二维码（扫一次永久生效）</div></div>`;
     return;
   }
   try {
@@ -1945,9 +2098,36 @@ async function boot() {
     BASE_TUNNEL = await resolveTunnelUrl();
     if (!BASE_TUNNEL) throw new Error("电脑隧道未启动");
 
-    const qResp = await fetch(`${BASE_TUNNEL}/api/queue/${encodeURIComponent(ACCT)}?k=${encodeURIComponent(SECRET)}&t=${Date.now()}`, { cache: "no-store" });
-    if (!qResp.ok) throw new Error("电脑服务未响应 (" + qResp.status + ")");
+    try {
+      const aResp = await fetch(apiUrl(`/api/auth/status?t=${Date.now()}`), {
+        cache: "no-store",
+        headers: authHeaders()
+      });
+      if (aResp.ok) {
+        const aData = await aResp.json();
+        AUTH_STATE = aData || AUTH_STATE;
+        CURRENT_ROLE = aData.role || CURRENT_ROLE;
+      }
+    } catch (e) {}
+
+    const protList = Array.isArray(AUTH_STATE.protected_accounts) ? AUTH_STATE.protected_accounts : ["240", "417"];
+    if (protList.includes(ACCT) && !ADMIN_TOKEN) {
+      renderAuthGate("admin", `🛡️ ${ACCT} 号机为受保护精品号，请输入管理员口令`);
+      return;
+    }
+    if (!hasAnyAuth()) {
+      renderAuthGate("team", "🔐 请输入团队访问密码（记住 30 天）");
+      return;
+    }
+
+    const qResp = await fetch(apiUrl(`/api/queue/${encodeURIComponent(ACCT)}?t=${Date.now()}`), {
+      cache: "no-store",
+      headers: authHeaders()
+    });
     const qData = await qResp.json();
+    if (handleAuthFailureResp(qResp, qData)) return;
+    if (!qResp.ok) throw new Error((qData && (qData.message || qData.error)) || ("电脑服务未响应 (" + qResp.status + ")"));
+    if (selfBtn) selfBtn.style.display = "inline-block";
     if (preloadObserver) {
       preloadObserver.disconnect();
       preloadObserver = null;
@@ -1958,6 +2138,7 @@ async function boot() {
     clearObjectProps(preloadedFiles);
     clearObjectProps(preloadPromises);
     LAST_SERVER_TIME = qData.server_time || "";
+    CURRENT_ROLE = qData.role || CURRENT_ROLE;
     ITEMS = qData.items || [];
     updateConnSub();
     renderItems();
