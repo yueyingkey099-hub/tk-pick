@@ -264,6 +264,86 @@
   .hook-lightbox-title { font-size: 14px; font-weight: 800; color: #f8fafc; margin-bottom: 4px; }
   .hook-lightbox-sub { font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
   .hook-lightbox-acts { display: flex; gap: 8px; }
+  .btn-danger-soft {
+    background: rgba(239,68,68,0.16); border: 1px solid rgba(248,113,113,0.45);
+    color: #fecaca;
+  }
+  .hook-import-box {
+    background: #0b1120; border: 1px solid #263554; border-radius: 11px;
+    padding: 9px 10px; margin-bottom: 8px;
+  }
+  .hook-import-hdr {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 12px; font-weight: 800; color: #e2e8f0; margin-bottom: 6px;
+  }
+  .hook-import-tip { font-size: 10.5px; color: #94a3b8; font-weight: 500; }
+  .hook-import-url {
+    width: 100%; padding: 8px 10px; border-radius: 9px; border: 1px solid #334155;
+    background: #060a14; color: #f8fafc; font-size: 15px; font-family: inherit;
+    outline: none; margin-bottom: 7px;
+  }
+  .hook-import-url:focus { border-color: #fe2c55; }
+  .hook-import-row {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .hook-import-page-wrap {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #060a14; border: 1px solid #334155; border-radius: 9px;
+    padding: 4px 8px; font-size: 12px; color: #cbd5e1; font-weight: 700;
+  }
+  .hook-import-page-inp {
+    width: 42px; background: transparent; border: none; color: #fff;
+    font-size: 15px; font-weight: 800; text-align: center; outline: none;
+  }
+  .hook-import-label-inp {
+    flex: 1; min-width: 96px; padding: 7px 9px; border-radius: 9px;
+    border: 1px solid #334155; background: #060a14; color: #f8fafc;
+    font-size: 14px; outline: none;
+  }
+  .hook-import-label-inp:focus { border-color: #fe2c55; }
+  .hook-import-btn {
+    border: 1px solid #334155; background: #1e293b; color: #e2e8f0;
+    border-radius: 9px; padding: 7px 10px; font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+  }
+  .hook-import-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .hook-import-btn-primary {
+    border-color: #fe2c55; background: linear-gradient(135deg, #fe2c55, #e11d48); color: #fff;
+  }
+  .hook-import-msg {
+    font-size: 11.5px; line-height: 1.4; margin-top: 6px; display: none;
+  }
+  .hook-import-preview-wrap { margin-top: 8px; display: none; }
+  .hook-import-preview-hdr {
+    font-size: 11px; color: #94a3b8; margin-bottom: 5px;
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  }
+  .hook-import-strip {
+    display: flex; gap: 7px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 2px 0;
+  }
+  .hook-import-slide {
+    flex: 0 0 74px; position: relative; background: #060911;
+    border: 2px solid #263554; border-radius: 9px; overflow: hidden; cursor: pointer;
+  }
+  .hook-import-slide.selected {
+    border-color: #fe2c55; box-shadow: 0 0 0 1px rgba(254,44,85,0.45);
+  }
+  .hook-import-slide img {
+    width: 100%; aspect-ratio: 9/16; object-fit: contain; display: block; background: #060911;
+  }
+  .hook-import-slide-badge {
+    position: absolute; top: 3px; left: 3px;
+    background: rgba(15,23,42,0.86); color: #f8fafc;
+    font-size: 10px; font-weight: 800; padding: 1px 5px; border-radius: 5px;
+  }
+  .hook-import-slide.selected .hook-import-slide-badge {
+    background: #fe2c55;
+  }
+  .hook-custom-badge {
+    position: absolute; top: 4px; left: 4px; background: rgba(13,148,136,0.94); color: #f0fdfa;
+    font-size: 9.5px; font-weight: 800; padding: 2px 5px; border-radius: 5px; z-index: 1;
+  }
+  .hook-tile.selected .hook-custom-badge { top: 24px; }
 </style>
 </head>
 <body>
@@ -306,6 +386,24 @@
           <button type="button" id="btnTextModeOrig" class="hook-seg-btn" onclick="setHookTextMode('original')">🔤 原版带字(54)</button>
         </div>
       </div>
+      <div id="hookImportBox" class="hook-import-box">
+        <div class="hook-import-hdr">
+          <span>🔗 从目标图文链接提取指定页入池</span>
+          <span class="hook-import-tip">支持 /photo/ 或短链</span>
+        </div>
+        <input id="hookImportUrl" type="text" class="hook-import-url" oninput="onHookImportUrlChange()" placeholder="粘贴 TikTok 图文链接或分享文案（如 tiktok.com/t/...）">
+        <div class="hook-import-row">
+          <label class="hook-import-page-wrap">第 <input id="hookImportPage" type="number" class="hook-import-page-inp" min="1" max="35" value="1" inputmode="numeric" oninput="onHookImportPageChange()"> 页</label>
+          <input id="hookImportLabel" type="text" class="hook-import-label-inp" maxlength="24" placeholder="备注名(可选)">
+          <button type="button" id="btnHookImportPreview" class="hook-import-btn" onclick="previewTikTokHookUrl()">👁 预览各页</button>
+          <button type="button" id="btnHookImportAdd" class="hook-import-btn hook-import-btn-primary" onclick="addTikTokHookToPool()">➕ 加入钩子池</button>
+        </div>
+        <div id="hookImportMsg" class="hook-import-msg"></div>
+        <div id="hookImportPreviewWrap" class="hook-import-preview-wrap">
+          <div id="hookImportPreviewHdr" class="hook-import-preview-hdr"></div>
+          <div id="hookImportStrip" class="hook-import-strip"></div>
+        </div>
+      </div>
       <div id="hookPoolSelectedBar" class="hook-selected-bar">
         <div class="hook-sel-left">
           <div class="hook-sel-text">🎲 当前首图：智能随机（34张无字底图轮换）</div>
@@ -313,6 +411,7 @@
       </div>
       <div class="hook-subfilter">
         <button type="button" class="hook-pill active" data-hook-filter="all" onclick="setHookPoolFilter('all')">全部(58)</button>
+        <button type="button" id="pillHookCustom" class="hook-pill" data-hook-filter="custom" style="display:none;" onclick="setHookPoolFilter('custom')">📌 链接入池(0)</button>
         <button type="button" class="hook-pill" data-hook-filter="static" onclick="setHookPoolFilter('static')">🔥 无字静图(34)</button>
         <button type="button" class="hook-pill" data-hook-filter="dynamic" onclick="setHookPoolFilter('dynamic')">✨ 带字动态模板(24)</button>
         <button type="button" id="btnExpandHookGrid" class="hook-mini-btn" style="margin-left:auto;" onclick="toggleHookGridExpand()">⤢ 展开看全部</button>
@@ -358,6 +457,7 @@
     <div id="hookLightboxSub" class="hook-lightbox-sub"></div>
     <div class="hook-lightbox-acts">
       <button type="button" class="btn btn-primary" style="margin:0; padding:11px; font-size:14px; flex:1;" onclick="chooseFromLightbox()">✅ 就选这张做首图</button>
+      <button type="button" id="btnLightboxDeleteCustom" class="btn btn-danger-soft" style="display:none; margin:0; padding:11px; font-size:13px; width:auto;" onclick="deleteCustomHookFromLightbox()">🗑️ 删除</button>
       <button type="button" class="btn btn-slate" style="margin:0; padding:11px; font-size:14px; width:auto; min-width:86px;" onclick="closeHookLightbox()">关闭</button>
     </div>
   </div>
@@ -398,6 +498,14 @@ let uploadedHookB64 = "";
 let uploadedHookMeta = null;
 let selectedRecentUploadId = "";
 let lightboxHookId = "";
+let hookImportPreviewId = "";
+let hookImportPreviewData = null;
+let hookImportBusy = false;
+
+function getCustomHooks() {
+  if (!HOOK_POOL_DATA || !Array.isArray(HOOK_POOL_DATA.custom_hooks)) return [];
+  return HOOK_POOL_DATA.custom_hooks;
+}
 
 function getActiveStaticHooks() {
   if (!HOOK_POOL_DATA) return [];
@@ -425,6 +533,8 @@ function hookThumbUrl(hookId, full = false) {
 
 function findHookInfoById(hookId) {
   if (!HOOK_POOL_DATA || !hookId) return null;
+  const cu = getCustomHooks().find(x => x.id === hookId);
+  if (cu) return { kind: "custom", item: cu };
   const st = getActiveStaticHooks().find(x => x.id === hookId);
   if (st) return { kind: "static", item: st };
   const dy = (HOOK_POOL_DATA.dynamic_hooks || []).find(x => x.id === hookId);
@@ -447,14 +557,27 @@ function syncHookTextToggleUi() {
     origBtn.classList.toggle("active", hookTextMode === "original");
     origBtn.textContent = `🔤 原版带字(${origCnt})`;
   }
+  const custCnt = getCustomHooks().length;
+  const custPill = document.getElementById("pillHookCustom");
+  if (custPill) {
+    custPill.style.display = custCnt > 0 ? "inline-block" : "none";
+    custPill.textContent = `📌 链接入池(${custCnt})`;
+  }
+  if (selfHookFilter === "custom" && custCnt === 0) {
+    selfHookFilter = "all";
+    document.querySelectorAll(".hook-pill[data-hook-filter]").forEach(el => {
+      el.classList.toggle("active", el.getAttribute("data-hook-filter") === selfHookFilter);
+    });
+  }
   const hint = document.getElementById("hookPoolSummaryHint");
   if (hint && HOOK_POOL_DATA) {
     const stCnt = getActiveStaticHooks().length;
     const dyCnt = (HOOK_POOL_DATA.dynamic_hooks || []).length;
+    const custPrefix = custCnt > 0 ? `${custCnt}张链接入池 + ` : "";
     if (hookTextMode === "original") {
-      hint.textContent = `${stCnt}张原版带字 + ${dyCnt}套动态 (${HOOK_POOL_DATA.family_count_original || 54}家族)`;
+      hint.textContent = `${custPrefix}${stCnt}张原版带字 + ${dyCnt}套动态 (${HOOK_POOL_DATA.family_count_original || 54}家族)`;
     } else {
-      hint.textContent = `${stCnt}张无字静图 + ${dyCnt}套带字动态 (${HOOK_POOL_DATA.family_count || 54}类)`;
+      hint.textContent = `${custPrefix}${stCnt}张无字静图 + ${dyCnt}套带字动态 (${HOOK_POOL_DATA.family_count || 54}类)`;
     }
   }
 }
@@ -493,9 +616,14 @@ function updateSelfSubmitBtnText() {
   }
   if (selectedPoolHookId) {
     const info = findHookInfoById(selectedPoolHookId);
-    const shortName = (info && info.kind === "dynamic")
-      ? info.item.title
-      : `${selectedPoolHookId}(${hookTextMode === "original" ? "带字" : "无字"})`;
+    let shortName = "";
+    if (info && info.kind === "dynamic") {
+      shortName = info.item.title;
+    } else if (info && info.kind === "custom") {
+      shortName = `${selectedPoolHookId}·${info.item.label || "链接入池"}`;
+    } else {
+      shortName = `${selectedPoolHookId}(${hookTextMode === "original" ? "带字" : "无字"})`;
+    }
     btn.textContent = `🚀 自动生码出图（已选 ${shortName} + 自动后2张）`;
   } else {
     const modeLbl = hookTextMode === "original" ? "带字+动态" : "无字底图";
@@ -517,7 +645,7 @@ function setSelfHookMode(mode) {
 }
 
 function setHookPoolFilter(filterVal) {
-  selfHookFilter = (filterVal === "static" || filterVal === "dynamic") ? filterVal : "all";
+  selfHookFilter = (filterVal === "static" || filterVal === "dynamic" || filterVal === "custom") ? filterVal : "all";
   document.querySelectorAll(".hook-pill[data-hook-filter]").forEach(el => {
     el.classList.toggle("active", el.getAttribute("data-hook-filter") === selfHookFilter);
   });
@@ -548,13 +676,19 @@ function renderHookSelectedBar() {
     return;
   }
   const info = findHookInfoById(selectedPoolHookId);
-  const titleTxt = info
-    ? (info.kind === "dynamic" ? `✨ ${info.item.title}` : `🔥 ${info.item.label}`)
-    : selectedPoolHookId;
-  const staticSub = hookTextMode === "original" ? "原版带字爆款 · 自动4D去重" : "纯净无字底图(可在TikTok加字)";
-  const subTxt = info
-    ? (info.kind === "dynamic" ? info.item.subtitle : `复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · ${staticSub}`)
-    : "已固定第1张首图";
+  let titleTxt = selectedPoolHookId;
+  let subTxt = "已固定第1张首图";
+  if (info && info.kind === "dynamic") {
+    titleTxt = `✨ ${info.item.title}`;
+    subTxt = info.item.subtitle;
+  } else if (info && info.kind === "custom") {
+    titleTxt = `📌 ${info.item.id} · ${info.item.label}`;
+    subTxt = `链接入池 第${info.item.page || 1}/${info.item.slide_count || 1}页 · ${info.item.added_at || "刚入池"} · 出图自动4D去重`;
+  } else if (info && info.kind === "static") {
+    titleTxt = `🔥 ${info.item.label}`;
+    const staticSub = hookTextMode === "original" ? "原版带字爆款 · 自动4D去重" : "纯净无字底图(可在TikTok加字)";
+    subTxt = `复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · ${staticSub}`;
+  }
   const thumb = hookThumbUrl(selectedPoolHookId, false);
   const idJs = esc(escJs(selectedPoolHookId));
   bar.innerHTML = `<div class="hook-sel-left">
@@ -584,12 +718,18 @@ function renderHookPoolGrid() {
     grid.innerHTML = `<div style="grid-column:1/-1; padding:16px; text-align:center; color:#94a3b8; font-size:12px;">⚡ 正在加载爆款钩子图库...</div>`;
     return;
   }
+  const customs = getCustomHooks();
   const statics = getActiveStaticHooks();
   const dynamics = HOOK_POOL_DATA.dynamic_hooks || [];
   const allBtn = document.querySelector('.hook-pill[data-hook-filter="all"]');
+  const custBtn = document.getElementById("pillHookCustom");
   const stBtn = document.querySelector('.hook-pill[data-hook-filter="static"]');
   const dyBtn = document.querySelector('.hook-pill[data-hook-filter="dynamic"]');
-  if (allBtn) allBtn.textContent = `全部(${statics.length + dynamics.length})`;
+  if (allBtn) allBtn.textContent = `全部(${customs.length + statics.length + dynamics.length})`;
+  if (custBtn) {
+    custBtn.style.display = customs.length > 0 ? "inline-block" : "none";
+    custBtn.textContent = `📌 链接入池(${customs.length})`;
+  }
   if (stBtn) stBtn.textContent = hookTextMode === "original" ? `🔥 带字静图(${statics.length})` : `🔥 无字静图(${statics.length})`;
   if (dyBtn) dyBtn.textContent = `✨ 带字动态模板(${dynamics.length})`;
 
@@ -612,6 +752,25 @@ function renderHookPoolGrid() {
         <div class="hook-tile-sub">省心防同质</div>
       </div>
     </div>`);
+  }
+
+  if (selfHookFilter === "all" || selfHookFilter === "custom") {
+    for (const c of customs) {
+      const sel = selectedPoolHookId === c.id;
+      const idJs = esc(escJs(c.id));
+      const tUrl = hookThumbUrl(c.id, false);
+      const subText = `${c.added_at || "链接入池"} · ${Number(c.play_count || 0) > 0 ? formatViewsShort(c.play_count) : "全号可复用"}`;
+      tiles.push(`<div class="hook-tile ${sel ? 'selected' : ''}" onclick="selectPoolHook('${idJs}')">
+        ${sel ? '<div class="hook-check-badge">✓</div>' : ''}
+        <div class="hook-custom-badge">📌 第${Number(c.page || 1)}页</div>
+        <button type="button" class="hook-zoom-btn" onclick="openHookLightbox('${idJs}', event)" title="查看大图">👁</button>
+        <img class="hook-tile-img" src="${tUrl}" loading="lazy" alt="${esc(c.id)}">
+        <div class="hook-tile-cap">
+          <div class="hook-tile-title">${esc(c.id)} · ${esc(c.label)}</div>
+          <div class="hook-tile-sub">${esc(subText)}</div>
+        </div>
+      </div>`);
+    }
   }
 
   if (selfHookFilter === "all" || selfHookFilter === "static") {
@@ -717,15 +876,19 @@ function openHookLightbox(hookId, evt) {
   const img = document.getElementById("hookLightboxImg");
   const titleEl = document.getElementById("hookLightboxTitle");
   const subEl = document.getElementById("hookLightboxSub");
+  const delBtn = document.getElementById("btnLightboxDeleteCustom");
   const info = findHookInfoById(hookId);
   if (img) img.src = hookThumbUrl(hookId, true);
+  if (delBtn) delBtn.style.display = (info && info.kind === "custom") ? "inline-flex" : "none";
   if (titleEl) {
     if (info && info.kind === "dynamic") titleEl.textContent = `✨ ${info.item.title} (${hookId})`;
+    else if (info && info.kind === "custom") titleEl.textContent = `📌 ${info.item.id} · ${info.item.label}`;
     else if (info && info.kind === "static") titleEl.textContent = `🔥 ${info.item.label}`;
     else titleEl.textContent = hookId;
   }
   if (subEl) {
     if (info && info.kind === "dynamic") subEl.textContent = `${info.item.subtitle}（将自动填入你提交商品的名称与价格）`;
+    else if (info && info.kind === "custom") subEl.textContent = `来自目标图文第 ${info.item.page || 1}/${info.item.slide_count || 1} 页 · ${info.item.added_at || ""} 入池 · 出图自动4D去重`;
     else if (info && info.kind === "static") subEl.textContent = `历史复用 ${info.item.reuse_count} 次 · ${formatViewsShort(info.item.total_views)} · ${hookTextMode === "original" ? "原版带字爆款 · 出图自动4D去重" : "纯净无字底图(可在TikTok自由加字)"}`;
     else subEl.textContent = "";
   }
@@ -747,6 +910,218 @@ function chooseFromLightbox() {
   } else {
     setSelfHookMode("pool");
     selectPoolHook(targetId);
+  }
+}
+
+function setHookImportMessage(msg, color) {
+  const el = document.getElementById("hookImportMsg");
+  if (!el) return;
+  if (!msg) {
+    el.style.display = "none";
+    el.textContent = "";
+    return;
+  }
+  el.style.display = "block";
+  el.style.color = color || "#94a3b8";
+  el.textContent = msg;
+}
+
+function setHookImportBusy(busy) {
+  hookImportBusy = !!busy;
+  const bPrev = document.getElementById("btnHookImportPreview");
+  const bAdd = document.getElementById("btnHookImportAdd");
+  if (bPrev) bPrev.disabled = hookImportBusy;
+  if (bAdd) bAdd.disabled = hookImportBusy;
+}
+
+function onHookImportUrlChange() {
+  hookImportPreviewId = "";
+  hookImportPreviewData = null;
+  const pWrap = document.getElementById("hookImportPreviewWrap");
+  const strip = document.getElementById("hookImportStrip");
+  if (pWrap) pWrap.style.display = "none";
+  if (strip) strip.innerHTML = "";
+  const pInp = document.getElementById("hookImportPage");
+  if (pInp) pInp.max = "35";
+  setHookImportMessage("", "");
+}
+
+function renderImportPreviewStrip() {
+  const pWrap = document.getElementById("hookImportPreviewWrap");
+  const hdr = document.getElementById("hookImportPreviewHdr");
+  const strip = document.getElementById("hookImportStrip");
+  if (!pWrap || !strip || !hookImportPreviewData || !hookImportPreviewId) return;
+  const slides = hookImportPreviewData.slides || [];
+  if (!slides.length) {
+    pWrap.style.display = "none";
+    return;
+  }
+  const pInp = document.getElementById("hookImportPage");
+  const curPage = Math.max(1, parseInt((pInp && pInp.value) || "1", 10) || 1);
+  pWrap.style.display = "block";
+  if (hdr) {
+    const auth = hookImportPreviewData.author ? `@${hookImportPreviewData.author}` : "目标帖子";
+    const plays = Number(hookImportPreviewData.play_count || 0) > 0 ? ` · ${formatViewsShort(hookImportPreviewData.play_count)}` : "";
+    hdr.textContent = `${auth}${plays} · 共 ${slides.length} 页（点缩略图选页）`;
+  }
+  strip.innerHTML = slides.map(s => {
+    const pg = Number(s.page || 1);
+    const sel = pg === curPage;
+    const sUrl = `${BASE_TUNNEL}/api/hook_import_slide/${encodeURIComponent(hookImportPreviewId)}/${pg}?k=${encodeURIComponent(SECRET)}`;
+    return `<div class="hook-import-slide ${sel ? 'selected' : ''}" onclick="selectImportPreviewPage(${pg})">
+      <div class="hook-import-slide-badge">P${pg}${sel ? ' ✓' : ''}</div>
+      <img src="${sUrl}" loading="lazy" alt="第${pg}页">
+    </div>`;
+  }).join("");
+}
+
+function onHookImportPageChange() {
+  if (hookImportPreviewData && hookImportPreviewId) {
+    renderImportPreviewStrip();
+  }
+}
+
+function selectImportPreviewPage(pageNum) {
+  const pInp = document.getElementById("hookImportPage");
+  if (pInp) pInp.value = String(Math.max(1, Number(pageNum || 1)));
+  renderImportPreviewStrip();
+}
+
+async function previewTikTokHookUrl() {
+  if (hookImportBusy) return;
+  if (!BASE_TUNNEL || !SECRET) {
+    showToast("⚠️ 请先连上电脑总控台", "#f59e0b");
+    return;
+  }
+  const urlInp = document.getElementById("hookImportUrl");
+  const rawUrl = (urlInp ? urlInp.value : "").trim();
+  if (!rawUrl) {
+    setHookImportMessage("⚠️ 请先粘贴目标 TikTok 图文链接", "#fbbf24");
+    return;
+  }
+  setHookImportBusy(true);
+  setHookImportMessage("⏳ 正在解析目标图文各页图片...", "#93c5fd");
+  try {
+    const resp = await fetch(`${BASE_TUNNEL}/api/hook_import_preview?k=${encodeURIComponent(SECRET)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: rawUrl })
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) {
+      throw new Error(data.error || ("HTTP " + resp.status));
+    }
+    hookImportPreviewId = data.preview_id || "";
+    hookImportPreviewData = data;
+    const pInp = document.getElementById("hookImportPage");
+    const maxCnt = Math.max(1, Number(data.slide_count || 1));
+    if (pInp) {
+      pInp.max = String(maxCnt);
+      const curVal = parseInt(pInp.value || "1", 10) || 1;
+      if (curVal < 1) pInp.value = "1";
+      else if (curVal > maxCnt) pInp.value = String(maxCnt);
+    }
+    renderImportPreviewStrip();
+    setHookImportMessage(`✅ 解析成功：共 ${maxCnt} 页，点缩略图或填页码后点「➕ 加入钩子池」`, "#6ee7b7");
+  } catch (err) {
+    hookImportPreviewId = "";
+    hookImportPreviewData = null;
+    setHookImportMessage("⚠️ " + (err.message || "解析链接失败"), "#fca5a5");
+  } finally {
+    setHookImportBusy(false);
+  }
+}
+
+async function addTikTokHookToPool() {
+  if (hookImportBusy) return;
+  if (!BASE_TUNNEL || !SECRET) {
+    showToast("⚠️ 请先连上电脑总控台", "#f59e0b");
+    return;
+  }
+  const urlInp = document.getElementById("hookImportUrl");
+  const pageInp = document.getElementById("hookImportPage");
+  const lblInp = document.getElementById("hookImportLabel");
+  const rawUrl = (urlInp ? urlInp.value : "").trim();
+  const pageVal = parseInt((pageInp ? pageInp.value : "1") || "1", 10);
+  const labelVal = (lblInp ? lblInp.value : "").trim();
+  if (!rawUrl && !hookImportPreviewId) {
+    setHookImportMessage("⚠️ 请先粘贴目标 TikTok 图文链接", "#fbbf24");
+    return;
+  }
+  if (!Number.isFinite(pageVal) || pageVal < 1) {
+    setHookImportMessage("⚠️ 请填写正确的页码（从 1 开始）", "#fbbf24");
+    return;
+  }
+  setHookImportBusy(true);
+  setHookImportMessage(`⏳ 正在提取第 ${pageVal} 页无水印原图并入池...`, "#93c5fd");
+  try {
+    const resp = await fetch(`${BASE_TUNNEL}/api/hook_import_add?k=${encodeURIComponent(SECRET)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url: rawUrl,
+        page: pageVal,
+        label: labelVal,
+        preview_id: hookImportPreviewId,
+        account_key: ACCT
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok || !data.hook) {
+      throw new Error(data.error || ("HTTP " + resp.status));
+    }
+    if (data.catalog) {
+      HOOK_POOL_DATA = data.catalog;
+    }
+    syncHookTextToggleUi();
+    setSelfHookMode("pool");
+    selectPoolHook(data.hook.id);
+    if (urlInp) urlInp.value = "";
+    if (lblInp) lblInp.value = "";
+    hookImportPreviewId = "";
+    hookImportPreviewData = null;
+    const pWrap = document.getElementById("hookImportPreviewWrap");
+    const strip = document.getElementById("hookImportStrip");
+    if (pWrap) pWrap.style.display = "none";
+    if (strip) strip.innerHTML = "";
+    if (pageInp) pageInp.max = "35";
+    const okMsg = data.already_exists
+      ? `ℹ️ 该图已在钩子池 (${data.hook.id})，已自动选中`
+      : `✅ 已将第 ${pageVal} 页加入钩子池 (${data.hook.id}) 并自动选中！`;
+    setHookImportMessage(okMsg, "#6ee7b7");
+    showToast(okMsg);
+  } catch (err) {
+    setHookImportMessage("⚠️ " + (err.message || "加入钩子池失败"), "#fca5a5");
+    showToast("⚠️ " + (err.message || "加入钩子池失败"), "#ef4444");
+  } finally {
+    setHookImportBusy(false);
+  }
+}
+
+async function deleteCustomHookFromLightbox() {
+  const targetId = lightboxHookId;
+  if (!targetId || !BASE_TUNNEL || !SECRET) return;
+  if (!confirm("确定从爆款钩子池移出这张链接导入的钩子图？")) return;
+  try {
+    const resp = await fetch(`${BASE_TUNNEL}/api/hook_import_delete?k=${encodeURIComponent(SECRET)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hook_id: targetId })
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) {
+      throw new Error(data.error || ("HTTP " + resp.status));
+    }
+    if (data.catalog) HOOK_POOL_DATA = data.catalog;
+    if (selectedPoolHookId === targetId) selectedPoolHookId = "";
+    closeHookLightbox();
+    syncHookTextToggleUi();
+    renderHookSelectedBar();
+    renderHookPoolGrid();
+    updateSelfSubmitBtnText();
+    showToast(`🗑️ 已从钩子池移出 ${targetId}`);
+  } catch (err) {
+    showToast("⚠️ 删除失败：" + (err.message || ""), "#ef4444");
   }
 }
 
