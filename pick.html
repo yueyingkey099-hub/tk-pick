@@ -1848,9 +1848,9 @@ async function submitPhoneLogin(scope) {
 
 /* ====== Free-Form Gemini Image Studio (Tab 2) ====== */
 const DEFAULT_GENAI_MODELS = [
-  { id: "gemini-nano-banana-2.1", name: "Nano Banana 2.1", short: "NB 2.1 (推荐)", tag: "推荐·多图均衡", max_refs: 14, sizes: ["1K", "2K"], est_usd: { "1K": 0.0336, "2K": 0.0504 }, hint: "主力均衡模型：支持最多 14 张参考图融合、改图与局部精修（1K 约 $0.034/张，2K 约 $0.050/张）" },
-  { id: "gemini-3.1-flash-lite-image", name: "Nano Banana 2 Lite", short: "Lite (极速低价)", tag: "极速·低输入费", max_refs: 4, sizes: ["1K", "2K"], est_usd: { "1K": 0.0336, "2K": 0.0504 }, hint: "适合文生图或 0–1 张参考图快速出稿；多图复杂融合建议切回 Nano Banana 2.1" },
-  { id: "gemini-3-pro-image", name: "Nano Banana Pro", short: "Pro (精修文字)", tag: "精修·文字最强", max_refs: 14, sizes: ["1K", "2K"], est_usd: { "1K": 0.134, "2K": 0.134 }, hint: "精修画质与海报英文文字渲染最强（约 $0.134/张，1K 与 2K 同价）" },
+  { id: "gemini-nano-banana-2.1", name: "Nano Banana 2.1", short: "NB 2.1 (推荐)", tag: "推荐·多图均衡", max_refs: 14, sizes: ["1K", "2K"], hint: "主力均衡模型：支持最多 14 张参考图融合、改图与局部精修，画质与速度兼顾" },
+  { id: "gemini-3.1-flash-lite-image", name: "Nano Banana 2 Lite", short: "Lite (极速出稿)", tag: "极速·轻量", max_refs: 4, sizes: ["1K", "2K"], hint: "适合文生图或 0–1 张参考图快速出稿；多图复杂融合建议切回 Nano Banana 2.1" },
+  { id: "gemini-3-pro-image", name: "Nano Banana Pro", short: "Pro (精修文字)", tag: "精修·文字最强", max_refs: 14, sizes: ["1K", "2K"], hint: "精修画质与海报英文文字渲染最强，适合细节精修与复杂排版指令" },
 ];
 const GENAI_RATIOS = [
   { id: "3:4", label: "3:4 竖图" },
@@ -1977,8 +1977,8 @@ function renderGenaiQuotaBar() {
   const dailyPill = q.is_admin
     ? `<span class="q-pill q-blue">🛡️ 管理员不限日额（今日已出 ${Number(q.daily_used || 0)} 张）</span>`
     : `<span class="q-pill ${Number(q.daily_remaining || 0) > 0 ? 'q-blue' : 'q-amber'}">🎨 今日已生 ${Number(q.daily_used || 0)}/${Number(q.daily_cap || 30)} 张</span>`;
-  const budgetPill = `<span class="q-pill ${q.budget_blocked ? 'q-amber' : ''}">💳 本月预算 $${Number(q.monthly_spent_usd || 0).toFixed(2)}/$${Number(q.monthly_budget_usd || 95)}</span>`;
-  bar.innerHTML = `${readyPill}${dailyPill}${budgetPill}`;
+  const blockedPill = q.budget_blocked ? `<span class="q-pill q-amber">⚠️ 本月团队 AI 额度已用完</span>` : "";
+  bar.innerHTML = `${readyPill}${dailyPill}${blockedPill}`;
 }
 function selectGenaiModel(mid) {
   GENAI_MODEL = mid;
@@ -2028,8 +2028,6 @@ function updateGenaiSubmitBtn() {
   const btn = document.getElementById("genaiSubmitBtn");
   if (!btn) return;
   const spec = getCurrentGenaiModelSpec();
-  const perImg = Number((spec.est_usd && spec.est_usd[GENAI_SIZE]) || 0.0336);
-  const est = (perImg * GENAI_COUNT).toFixed(3);
   const promptEl = document.getElementById("genaiPromptInput");
   const hasPrompt = !!(promptEl && promptEl.value.trim());
   if (GENAI_SUBMITTING) {
@@ -2038,11 +2036,11 @@ function updateGenaiSubmitBtn() {
   }
   if (!hasPrompt) {
     btn.className = "btn btn-primary";
-    btn.textContent = `✍️ 请先写提示词（预计 ${GENAI_COUNT} 张 ~$${est}）`;
+    btn.textContent = `✍️ 请先写提示词（将生成 ${GENAI_COUNT} 张）`;
     return;
   }
   btn.className = "btn btn-primary";
-  btn.textContent = `✨ 立即生成 ${GENAI_COUNT} 张（${spec.short || spec.name} · ${GENAI_SIZE} · ~$${est}）`;
+  btn.textContent = `✨ 立即生成 ${GENAI_COUNT} 张（${spec.short || spec.name} · ${GENAI_SIZE}）`;
 }
 function appendGenaiChip(text) {
   const ta = document.getElementById("genaiPromptInput");
@@ -2311,13 +2309,11 @@ function renderGenaiHistory() {
       </div>`;
     }).join("")}</div>` : `<div style="font-size:12px; color:#fca5a5;">${esc(job.stage_label || job.error || "未生成图片")}</div>`;
 
-    const costTag = job.actual_cost_usd > 0 ? `<span class="tag tag-green">$${Number(job.actual_cost_usd).toFixed(3)}</span>` : "";
     return `<div class="genai-history-card">
       <div class="genai-hist-hdr">
         <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;">
           <span class="tag">${esc(job.model_name || job.model)}</span>
           <span class="tag tag-amber">${esc(job.aspect_ratio)} · ${esc(job.image_size)}</span>
-          ${costTag}
           <span style="font-size:11px;color:#94a3b8;">${esc(job.created_at || "")}</span>
         </div>
         <div style="display:flex;gap:5px;">
