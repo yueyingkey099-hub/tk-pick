@@ -844,12 +844,25 @@ function bindManualAcct() {
   try { localStorage.setItem("tk_pick_last_acct", ACCT); history.replaceState(null, "", location.pathname + `?acct=${encodeURIComponent(ACCT)}`); } catch (e) {}
   applyBranding(); boot();
 }
+function isGenaiAllowed() {
+  const allowed = Array.isArray(AUTH_STATE.genai_allowed_accounts) ? AUTH_STATE.genai_allowed_accounts : ["240", "417"];
+  return allowed.includes(ACCT);
+}
+function applyGenaiVisibility() {
+  const ok = isGenaiAllowed();
+  const bg = document.getElementById("tabBtnGenai");
+  const mt = document.getElementById("mainTabs");
+  const vg = document.getElementById("viewGenai");
+  if (bg) bg.style.display = ok ? "" : "none";
+  if (mt) mt.style.gridTemplateColumns = ok ? "repeat(3, 1fr)" : "1fr 1fr";
+  if (!ok && vg) vg.style.display = "none";
+}
 function updateConnSub() {
   const sub = document.getElementById("connSub");
   const pending = ITEMS.filter(x => !x.published).length;
   if (sub) {
     sub.textContent = PICKUP_PAUSED_MSG
-      ? `🟡 套图暂缓升级 · 🎨 AI自由生图正常可用`
+      ? (isGenaiAllowed() ? `🟡 套图暂缓升级 · 🎨 AI自由生图正常可用` : `🟡 套图暂缓升级中`)
       : `🟢 已连接 · 待发 ${pending} 套${LAST_SERVER_TIME ? ` (${LAST_SERVER_TIME})` : ""}`;
   }
   const tabQ = document.getElementById("tabBtnQueue");
@@ -873,7 +886,8 @@ function renderQuotaBar() {
 }
 
 function switchMainTab(tabName, isAuto) {
-  const target = (tabName === "studio" || tabName === "genai") ? tabName : "queue";
+  let target = (tabName === "studio" || tabName === "genai") ? tabName : "queue";
+  if (target === "genai" && !isGenaiAllowed()) target = "queue";
   if (!isAuto) USER_SWITCHED_TAB = true;
   ACTIVE_TAB = target;
   const vs = document.getElementById("viewStudio");
@@ -893,7 +907,9 @@ function switchMainTab(tabName, isAuto) {
     const pb = document.getElementById("studioPauseBanner");
     if (pb) {
       pb.style.display = PICKUP_PAUSED_MSG ? "block" : "none";
-      pb.textContent = PICKUP_PAUSED_MSG ? `${PICKUP_PAUSED_MSG}（选品成片暂缓期间，可点上方「🎨 AI生图」自由出图）` : "";
+      pb.textContent = PICKUP_PAUSED_MSG
+        ? (isGenaiAllowed() ? `${PICKUP_PAUSED_MSG}（选品成片暂缓期间，可点上方「🎨 AI生图」自由出图）` : PICKUP_PAUSED_MSG)
+        : "";
     }
     if (!CATALOG_DATA && !CATALOG_LOADING) loadCatalog(false);
     renderTemplatesGrid();
@@ -1909,7 +1925,7 @@ function bindGenaiDropAndPaste() {
   });
 }
 async function loadGenaiConfigAndHistory() {
-  if (!BASE_TUNNEL || !hasAnyAuth() || !ACCT || GENAI_LOADING) return;
+  if (!BASE_TUNNEL || !hasAnyAuth() || !ACCT || GENAI_LOADING || !isGenaiAllowed()) return;
   GENAI_LOADING = true;
   try {
     const [cResp, hResp] = await Promise.all([
@@ -2226,6 +2242,7 @@ async function pollGenaiJob(jobId) {
 }
 async function submitGenaiJob() {
   if (GENAI_SUBMITTING) return;
+  if (!isGenaiAllowed()) { showToast("⚠️ 该账号未开放 AI 生图入口（仅 240 / 417 可用）", "#f59e0b"); return; }
   if (!ACCT || !hasAnyAuth() || !BASE_TUNNEL) { showToast("⚠️ 请先连接并验证手机身份", "#f59e0b"); return; }
   const promptEl = document.getElementById("genaiPromptInput");
   const promptTxt = (promptEl ? promptEl.value : "").trim();
@@ -2508,6 +2525,7 @@ async function boot() {
 
     const sampleBadge = document.getElementById("badgeSample");
     if (sampleBadge) sampleBadge.style.display = AUTH_STATE.sample_preview ? "inline-block" : "none";
+    applyGenaiVisibility();
 
     const protList = Array.isArray(AUTH_STATE.protected_accounts) ? AUTH_STATE.protected_accounts : ["240", "417"];
     if (!AUTH_STATE.sample_preview) {
@@ -2521,22 +2539,37 @@ async function boot() {
 
     if (qResp.status === 503 && qData && qData.paused) {
       PICKUP_PAUSED_MSG = qData.message || "套图暂缓发放升级中";
-      document.getElementById("mainTabs").style.display = "grid";
       ITEMS = [];
+      applyGenaiVisibility();
       updateConnSub();
-      root.innerHTML = `<div class="card">
-        <div class="prod-name">⏸️ ${esc(PICKUP_PAUSED_MSG)}</div>
-        <div class="help-tip" style="margin:10px 0;">在套图队列恢复发放前，你可以直接使用上方「🎨 AI生图」写提示词 + 传/粘参考图自由出图！</div>
-        <button class="btn btn-primary" onclick="switchMainTab('genai')">🎨 去用 AI 自由生图</button>
-      </div>`;
-      if (!USER_SWITCHED_TAB) switchMainTab("genai", true);
-      else switchMainTab(ACTIVE_TAB, true);
+      if (isGenaiAllowed()) {
+        document.getElementById("mainTabs").style.display = "grid";
+        root.innerHTML = `<div class="card">
+          <div class="prod-name">⏸️ ${esc(PICKUP_PAUSED_MSG)}</div>
+          <div class="help-tip" style="margin:10px 0;">在套图队列恢复发放前，你可以直接使用上方「🎨 AI生图」写提示词 + 传/粘参考图自由出图！</div>
+          <button class="btn btn-primary" onclick="switchMainTab('genai')">🎨 去用 AI 自由生图</button>
+        </div>`;
+        if (!USER_SWITCHED_TAB) switchMainTab("genai", true);
+        else switchMainTab(ACTIVE_TAB, true);
+      } else {
+        document.getElementById("mainTabs").style.display = "none";
+        document.getElementById("quotaBar").style.display = "none";
+        document.getElementById("viewStudio").style.display = "none";
+        const vg = document.getElementById("viewGenai");
+        if (vg) vg.style.display = "none";
+        document.getElementById("viewQueue").style.display = "block";
+        root.innerHTML = `<div class="card">
+          <div class="prod-name">⏸️ ${esc(PICKUP_PAUSED_MSG)}</div>
+          <div class="help-tip" style="margin:10px 0;">套图升级完成后将第一时间通知恢复，请稍候。</div>
+        </div>`;
+      }
       return;
     }
 
     if (!qResp.ok) throw new Error((qData && (qData.message || qData.error)) || ("服务响应 " + qResp.status));
 
     PICKUP_PAUSED_MSG = AUTH_STATE.pickup_paused ? (AUTH_STATE.pickup_pause_message || "") : "";
+    applyGenaiVisibility();
     document.getElementById("mainTabs").style.display = "grid";
     preloadQueue = []; preloadQueuedKeys.clear(); activePreloads = 0;
     clearObjectProps(preloadedFiles); clearObjectProps(preloadPromises);
