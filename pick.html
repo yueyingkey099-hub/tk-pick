@@ -534,6 +534,24 @@
   .comm-inp:focus, .comm-sel:focus { border-color: #3b82f6; }
   .comm-ref-strip { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 8px; }
   .comm-ref-strip img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; border: 1px solid #334155; cursor: pointer; flex-shrink: 0; }
+  .disclaimer-card {
+    background: linear-gradient(135deg, rgba(15,23,42,0.96), rgba(30,41,59,0.9));
+    border: 1px solid #334155; border-radius: 14px; padding: 10px 12px; margin-bottom: 10px;
+  }
+  .disclaimer-hdr { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .disclaimer-title { font-size: 12px; font-weight: 800; color: #e2e8f0; }
+  .disclaimer-pills { display: inline-flex; gap: 4px; }
+  .disclaimer-pill {
+    border: 1px solid #334155; background: #0f172a; color: #94a3b8; border-radius: 999px;
+    padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer;
+  }
+  .disclaimer-pill.active { background: #2563eb; border-color: #3b82f6; color: #fff; }
+  .disclaimer-preview {
+    background: #0b1120; border: 1px solid #1e293b; border-radius: 9px; padding: 7px 9px;
+    font-size: 11.5px; line-height: 1.45; color: #cbd5e1; margin-bottom: 8px; word-break: break-word;
+  }
+  .disclaimer-btns { display: grid; grid-template-columns: 1.35fr 1fr; gap: 7px; }
+  .disclaimer-btns .btn { margin-bottom: 0; padding: 10px 10px; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -809,6 +827,20 @@
 
 <!-- TAB 3: Ready Queue -->
 <div id="viewQueue">
+  <div id="disclaimerCard" class="disclaimer-card">
+    <div class="disclaimer-hdr">
+      <div class="disclaimer-title">🛡️ 价格合规声明（一键复制贴正文/评论）</div>
+      <div class="disclaimer-pills">
+        <button type="button" class="disclaimer-pill active" data-disc-range="11-30" onclick="setDisclaimerRange('11-30')">11.–30. Nov</button>
+        <button type="button" class="disclaimer-pill" data-disc-range="26-30" onclick="setDisclaimerRange('26-30')">26.–30. Nov</button>
+      </div>
+    </div>
+    <div id="disclaimerPreview" class="disclaimer-preview">Aktionszeitraum: 11.–30. November. Preise und Rabatte können je nach Nutzer variieren. Maßgeblich sind die im TikTok Shop angezeigten Endpreise.</div>
+    <div class="disclaimer-btns">
+      <button type="button" class="btn btn-blue" onclick="copyPriceDisclaimer('de')">📋 复制德语声明 (DE)</button>
+      <button type="button" class="btn btn-slate" onclick="copyPriceDisclaimer('en')">📋 复制英语声明 (EN)</button>
+    </div>
+  </div>
   <div id="app">
     <div class="card"><div class="prod-name">⚡ 正在同步电脑最新领料队列...</div></div>
   </div>
@@ -1893,6 +1925,39 @@ async function copyText(text, label) {
 }
 function copyItemField(key, field, label) { const it = getItemByKey(key); if (it) copyText(it[field] || "", label); }
 
+let DISCLAIMER_RANGE = (() => {
+  try {
+    const saved = (localStorage.getItem("tk_pick_disclaimer_range") || "").trim();
+    return (saved === "26-30" || saved === "11-30") ? saved : "11-30";
+  } catch (e) { return "11-30"; }
+})();
+function getPriceDisclaimerText(lang) {
+  const is26 = (DISCLAIMER_RANGE === "26-30");
+  if (String(lang || "de").toLowerCase() === "en") {
+    const periodEn = is26 ? "November 26-30" : "November 11-30";
+    return `Promotion Period: ${periodEn}. Prices and discounts may vary by user. Final prices are subject to what is displayed on TikTok Shop.`;
+  }
+  const periodDe = is26 ? "26.–30. November" : "11.–30. November";
+  return `Aktionszeitraum: ${periodDe}. Preise und Rabatte können je nach Nutzer variieren. Maßgeblich sind die im TikTok Shop angezeigten Endpreise.`;
+}
+function renderDisclaimerBar() {
+  const prev = document.getElementById("disclaimerPreview");
+  if (prev) prev.textContent = getPriceDisclaimerText("de");
+  document.querySelectorAll(".disclaimer-pill[data-disc-range]").forEach(btn => {
+    btn.classList.toggle("active", btn.getAttribute("data-disc-range") === DISCLAIMER_RANGE);
+  });
+}
+function setDisclaimerRange(rangeKey) {
+  DISCLAIMER_RANGE = (rangeKey === "26-30") ? "26-30" : "11-30";
+  try { localStorage.setItem("tk_pick_disclaimer_range", DISCLAIMER_RANGE); } catch (e) {}
+  renderDisclaimerBar();
+  showToast(`📅 已切换声明日期：${DISCLAIMER_RANGE === "26-30" ? "26.–30. Nov" : "11.–30. Nov"}`, "#3b82f6");
+}
+function copyPriceDisclaimer(lang) {
+  const isEn = String(lang || "de").toLowerCase() === "en";
+  copyText(getPriceDisclaimerText(isEn ? "en" : "de"), isEn ? "英语价格声明 (EN)" : "德语价格声明 (DE)");
+}
+
 function preloadItemSlides(item) {
   if (!item) return Promise.resolve([]);
   const key = itemKey(item);
@@ -2139,13 +2204,18 @@ function renderCardHtml(it) {
   }
 
   const hasTitle = !!(it.title || "").trim(), hasCaption = !!(it.caption || "").trim();
+  const cardDisclaimerBtns = isNoCart ? "" : `
+    <div class="disclaimer-btns" style="margin-top:7px; margin-bottom:10px;">
+      <button type="button" class="btn btn-blue" onclick="copyPriceDisclaimer('de')">📋 复制德语价格声明 (DE)</button>
+      <button type="button" class="btn btn-slate" onclick="copyPriceDisclaimer('en')">📋 复制英语声明 (EN)</button>
+    </div>`;
   const copySection = (!hasTitle && !hasCaption)
-    ? `<div class="step-label">📋 第二步：发布文案说明</div><div class="zero-copy-hint">${isVideo ? '✨ 零正文直发模式（0 字 Caption）：不填标题与正文，轻配音乐直接发布' : '✨ 零正文直发模式（0 字 Caption）：进 TikTok 选图 → 先挂橙色小黄车 → 搜商用音乐 → 标题正文留空直接发'}</div>`
+    ? `<div class="step-label">📋 第二步：发布文案说明</div><div class="zero-copy-hint">${isVideo ? '✨ 零正文直发模式（0 字 Caption）：不填标题与正文，轻配音乐直接发布' : '✨ 零正文直发模式（0 字 Caption）：进 TikTok 选图 → 先挂橙色小黄车 → 搜商用音乐 → 标题正文留空或按需贴价格声明'}</div>${cardDisclaimerBtns}`
     : `<div class="step-label">📋 第二步：复制无价标题与正文</div>
        <div class="copy-box"><div class="copy-hdr">📌 Title（标题）</div><div class="copy-txt">${esc(it.title || '(无标题)')}</div></div>
        <button class="btn btn-blue" onclick="copyItemField('${keyJs}', 'title', 'Title 标题')">📋 一键复制 Title 标题</button>
        <div class="copy-box"><div class="copy-hdr">📝 Caption（正文 + 标签）</div><div class="copy-txt">${esc(it.caption || '(无正文)')}</div></div>
-       <button class="btn btn-slate" onclick="copyItemField('${keyJs}', 'caption', 'Caption 正文')">📋 一键复制 Caption 正文</button>`;
+       <button class="btn btn-slate" onclick="copyItemField('${keyJs}', 'caption', 'Caption 正文')">📋 一键复制 Caption 正文</button>${cardDisclaimerBtns}`;
 
   const tplTag = it.template_id ? `<span class="tag tag-pink">${esc(it.template_id)} ${esc(it.template_name || '')}</span>` : "";
   const costTag = it.cost_mode === "0token_reuse"
@@ -3006,6 +3076,7 @@ async function boot() {
     LAST_SERVER_TIME = qData.server_time || "";
     CURRENT_ROLE = qData.role || CURRENT_ROLE;
     ITEMS = (qData.items || []).filter(x => !x.published);
+    renderDisclaimerBar();
     updateConnSub();
     renderItems();
     renderTemplatesGrid();
