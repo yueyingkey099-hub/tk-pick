@@ -2004,20 +2004,36 @@ async function reportAction(key, action) {
         updateConnSub();
         if (!ITEMS.length) renderItems();
       } else if (action === "publish") {
-        item.published = true;
+        // Auto-withdraw published card from phone pickup queue immediately
         delete preloadedFiles[key]; delete preloadPromises[key];
-        if (cardEl) {
-          cardEl.classList.add("is-done");
-          const pubBtn = cardEl.querySelector('[data-pub-btn="1"]');
-          if (pubBtn) pubBtn.textContent = "✅ 已登记发帖（电脑总控台已同步）";
-          const metaEl = cardEl.querySelector(".prod-meta");
-          if (metaEl && !metaEl.querySelector('[data-pub-tag="1"]')) {
-            const tag = document.createElement("span"); tag.className = "tag tag-green"; tag.setAttribute("data-pub-tag", "1");
-            tag.textContent = "✅ 本号已登记发帖"; metaEl.appendChild(tag);
+        ITEMS = ITEMS.filter(x => itemKey(x) !== key);
+        if (cardEl) cardEl.remove();
+        let addedCount = 0;
+        const refilled = Array.isArray(res.refilled_items) ? res.refilled_items : [];
+        if (refilled.length) {
+          const existingKeys = new Set(ITEMS.map(itemKey));
+          const root = document.getElementById("app");
+          for (const ni of refilled) {
+            if (!ni || ni.published) continue;
+            const nk = itemKey(ni);
+            if (existingKeys.has(nk)) continue;
+            ITEMS.push(ni);
+            existingKeys.add(nk);
+            addedCount++;
+            if (root && ITEMS.length > 1) {
+              root.insertAdjacentHTML("beforeend", renderCardHtml(ni));
+            }
           }
         }
+        if (!ITEMS.length || (addedCount > 0 && ITEMS.length === addedCount)) {
+          renderItems();
+        } else {
+          // Warm up the next top card so saving stays instant
+          const nextPending = ITEMS.find(x => !x.published);
+          if (nextPending) schedulePreload(itemKey(nextPending));
+        }
         updateConnSub();
-        showToast("✅ 已同步发帖状态回工作台！");
+        showToast(addedCount > 0 ? `✅ 已登记发帖并撤下（自动补入 ${addedCount} 套）` : "✅ 已登记发帖并自动撤下！");
         if (isCommercialAccount()) loadCommercialStatus(true);
       } else {
         showToast("✅ 已记录加橱窗！");
@@ -2989,7 +3005,7 @@ async function boot() {
     clearObjectProps(preloadedFiles); clearObjectProps(preloadPromises);
     LAST_SERVER_TIME = qData.server_time || "";
     CURRENT_ROLE = qData.role || CURRENT_ROLE;
-    ITEMS = qData.items || [];
+    ITEMS = (qData.items || []).filter(x => !x.published);
     updateConnSub();
     renderItems();
     renderTemplatesGrid();
