@@ -177,7 +177,7 @@
     border-radius: 8px; padding: 4px 8px; font-size: 11.5px; flex-shrink: 0; cursor: pointer;
   }
   .prod-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 11.5px; color: var(--muted); }
-  .tag { background: rgba(59,130,246,0.16); color: #93c5fd; padding: 3px 8px; border-radius: 6px; font-weight: 700; }
+  .tag { background: rgba(59,130,246,0.16); color: #93c5fd; padding: 3px 8px; border-radius: 6px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
   .tag-green { background: rgba(16,185,129,0.18); color: #6ee7b7; }
   .tag-amber { background: rgba(245,158,11,0.18); color: #fcd34d; }
   .tag-pink { background: rgba(254,44,85,0.18); color: #fda4af; }
@@ -215,6 +215,13 @@
   .slide-thumb-wrap { background: #0f172a; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-align: center; cursor: pointer; }
   .slide-thumb-wrap img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #090d16; display: block; }
   .slide-cap { font-size: 11px; color: var(--muted); padding: 4px 0; }
+  .video-preview-wrap { max-width: 280px; margin: 10px auto 6px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); background: #000; box-shadow: 0 8px 20px rgba(0,0,0,0.45); }
+  .video-preview-el { width: 100%; max-height: 430px; aspect-ratio: 9/16; object-fit: cover; display: block; background: #000; }
+  .no-cart-banner {
+    background: rgba(16,185,129,0.14); border: 1.5px solid rgba(16,185,129,0.5);
+    color: #a7f3d0; border-radius: 12px; padding: 10px 12px; font-size: 13px;
+    font-weight: 700; line-height: 1.48; margin: 10px 0 6px;
+  }
   .help-tip { font-size: 12px; color: var(--muted); line-height: 1.5; background: rgba(255,255,255,0.04); padding: 8px 11px; border-radius: 10px; margin-top: 6px; }
   .defect-details {
     margin: 10px 0 11px; background: #0b1120; border: 1px solid #263554; border-radius: 12px; padding: 8px 11px;
@@ -445,6 +452,88 @@
     padding: 5px 4px; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center;
   }
   .genai-mini-btn.wide { grid-column: 1 / -1; background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.4); color: #a7f3d0; }
+
+  /* Commercial 6-Account Sprint UX */
+  .comm-switcher {
+    background: #111b30; border: 1px solid #263554; border-radius: 14px;
+    padding: 8px 10px; margin-bottom: 10px; display: none; flex-direction: column; gap: 6px;
+  }
+  .comm-op-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .comm-op-lbl { font-size: 11px; font-weight: 800; color: #94a3b8; min-width: 58px; }
+  .comm-acct-pill {
+    border: 1px solid #334155; background: #0f172a; color: #cbd5e1;
+    border-radius: 999px; padding: 4px 10px; font-size: 11.5px; font-weight: 700;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+  }
+  .comm-acct-pill.active { background: #1d4ed8; border-color: #60a5fa; color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,0.35); }
+  .comm-acct-badge {
+    background: rgba(245,158,11,0.2); color: #fcd34d; border-radius: 999px;
+    padding: 0 6px; font-size: 10px; font-weight: 800;
+  }
+  .comm-acct-pill.active .comm-acct-badge { background: rgba(255,255,255,0.22); color: #fff; }
+  .comm-sprint-card {
+    background: linear-gradient(135deg, #131f38 0%, #0f172a 100%);
+    border: 1px solid #2b3f66; border-radius: 14px; padding: 11px 12px; margin-bottom: 11px;
+    display: none;
+  }
+  .comm-sprint-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 7px; }
+  .comm-prog-track { width: 100%; height: 8px; border-radius: 999px; background: #1e293b; overflow: hidden; margin-bottom: 8px; }
+  .comm-prog-fill { height: 100%; background: linear-gradient(90deg, #10b981, #3b82f6); border-radius: 999px; transition: width .3s ease; }
+  .comm-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 7px; }
+  @media (max-width: 480px) { .comm-kpis { grid-template-columns: repeat(2, 1fr); } }
+  .comm-kpi { background: #0b1120; border: 1px solid #1e293b; border-radius: 9px; padding: 6px 8px; }
+  .comm-kpi-num { font-size: 14px; font-weight: 900; color: #f8fafc; }
+  .comm-kpi-lbl { font-size: 10.5px; color: #94a3b8; }
+  .comm-ops-row { display: flex; justify-content: space-between; align-items: center; gap: 6px 12px; flex-wrap: wrap; font-size: 11.5px; color: #cbd5e1; }
+  .comm-guard-strip {
+    background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.32);
+    color: #fde68a; border-radius: 9px; padding: 6px 9px; font-size: 11.5px; line-height: 1.4; margin-bottom: 9px;
+  }
+  .comm-target-box {
+    background: #0b1120; border: 1px solid #263554; border-radius: 12px;
+    padding: 9px 10px; margin-bottom: 10px;
+  }
+  .comm-target-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .comm-discount-toggle {
+    display: none; align-items: flex-start; gap: 8px; background: rgba(16,185,129,0.09);
+    border: 1px solid rgba(16,185,129,0.3); border-radius: 11px; padding: 9px 11px; margin-top: 10px;
+    font-size: 12px; color: #d1fae5; line-height: 1.4; cursor: pointer;
+  }
+  .comm-discount-toggle input { margin-top: 2px; accent-color: #10b981; flex-shrink: 0; }
+  .comm-prod-row {
+    display: flex; gap: 9px; align-items: center; background: #0b1120;
+    border: 1.5px solid #263554; border-radius: 12px; padding: 9px; margin-bottom: 8px; cursor: pointer;
+  }
+  .comm-prod-row.selected { border-color: #3b82f6; background: #14223d; }
+  .comm-prod-row img { width: 52px; height: 52px; border-radius: 9px; object-fit: cover; background: #050811; flex-shrink: 0; }
+  .comm-slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 9px; }
+  @media (max-width: 560px) { .comm-slot-grid { grid-template-columns: repeat(2, 1fr); } }
+  .comm-slot-card {
+    background: #0b1120; border: 1.5px solid #263554; border-radius: 11px; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .comm-slot-card.is-approved { border-color: #10b981; }
+  .comm-slot-card.is-rejected { border-color: #ef4444; }
+  .comm-slot-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #050811; display: block; cursor: pointer; }
+  .comm-slot-empty {
+    width: 100%; aspect-ratio: 3/4; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 10px; text-align: center; background: #0f172a; color: #64748b; font-size: 11px; gap: 5px;
+  }
+  .comm-slot-body { padding: 7px 8px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+  .comm-slot-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: auto; }
+  .comm-form-box {
+    display: none; background: #0b1120; border: 1px solid #334155; border-radius: 12px;
+    padding: 11px; margin-bottom: 10px;
+  }
+  .comm-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 8px; }
+  @media (max-width: 520px) { .comm-form-grid { grid-template-columns: 1fr; } }
+  .comm-inp, .comm-sel {
+    width: 100%; background: #111b30; border: 1px solid #334155; color: #f8fafc;
+    border-radius: 9px; padding: 8px 10px; font-size: 12.5px; outline: none;
+  }
+  .comm-inp:focus, .comm-sel:focus { border-color: #3b82f6; }
+  .comm-ref-strip { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 8px; }
+  .comm-ref-strip img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; border: 1px solid #334155; cursor: pointer; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -463,10 +552,14 @@
   </div>
 </div>
 
+<div id="commSwitcherBar" class="comm-switcher"></div>
+<div id="commSprintCard" class="comm-sprint-card"></div>
+
 <div id="quotaBar" class="quota-bar"></div>
 
 <div id="mainTabs" class="main-tabs">
   <button type="button" id="tabBtnStudio" class="main-tab" onclick="switchMainTab('studio')">✨ 选品出图</button>
+  <button type="button" id="tabBtnCommercial" class="main-tab" style="display:none;" onclick="switchMainTab('commercial')">🗂️ 品池抽卡</button>
   <button type="button" id="tabBtnGenai" class="main-tab" onclick="switchMainTab('genai')">🎨 AI生图</button>
   <button type="button" id="tabBtnQueue" class="main-tab active" onclick="switchMainTab('queue')">📦 待发 (0)</button>
 </div>
@@ -476,7 +569,7 @@
   <div id="studioPauseBanner" class="pause-banner"></div>
   <div class="card">
     <div class="studio-step-hdr">
-      <div class="studio-step-title">① 挑高佣商品（内置 <span id="catTotalBadge">--</span> 个现货高佣品）</div>
+      <div class="studio-step-title" id="studioStep1Title">① 挑高佣商品（内置 <span id="catTotalBadge">--</span> 个现货高佣品）</div>
       <div class="studio-step-sub" id="catMatchSub">加载中...</div>
     </div>
 
@@ -485,7 +578,7 @@
       <button type="button" class="btn-lucky" onclick="pickRandomCatalogItem()">🎲 随机挑1个好品</button>
     </div>
 
-    <div class="filter-pills">
+    <div id="studioFilterPills" class="filter-pills">
       <button type="button" class="f-pill active" data-cat-filter="all" onclick="setCatalogFilter('all')">📦 全部高佣</button>
       <button type="button" class="f-pill" data-cat-filter="cached" onclick="setCatalogFilter('cached')">⚡ 已有实景秒出 (<span id="cachedCntPill">0</span>)</button>
       <button type="button" class="f-pill" data-cat-filter="high_comm" onclick="setCatalogFilter('high_comm')">💎 高佣优选</button>
@@ -494,7 +587,7 @@
 
     <div id="pastePidWrap" style="display:none; margin-bottom:10px;">
       <textarea id="selfPidInput" class="self-textarea" rows="2" placeholder="粘贴 1–5 个库外商品 ID 或 TikTok 商品链接（如 https://www.tiktok.com/shop/pdp/...）" oninput="updateStudioSubmitCta()"></textarea>
-      <div class="help-tip" style="margin-top:0;">💡 粘库外新 PID 将占用今日 <b>AI 现生新品额</b> 并后台拿 TSP 高佣码（约 35–60 秒）</div>
+      <div class="help-tip" id="pastePidHint" style="margin-top:0;">💡 粘库外新 PID 将占用今日 <b>AI 现生新品额</b> 并后台拿 TSP 高佣码（约 35–60 秒）</div>
     </div>
 
     <div id="selectedProdBar" class="selected-prod-bar"></div>
@@ -508,10 +601,21 @@
 
   <div class="card">
     <div class="studio-step-hdr">
-      <div class="studio-step-title">② 选 1 个无价爆款模板（10 大验证框架 · 0 额外生图费）</div>
+      <div class="studio-step-title" id="studioStep2Title">② 选 1 个无价爆款模板（10 大验证框架 · 0 额外生图费）</div>
       <div class="studio-step-sub">同品跨号自动错开防重</div>
     </div>
     <div id="tplGrid" class="tpl-grid"></div>
+    <div id="commSlideMixRow" style="display:none; margin:8px 0 6px; align-items:center; flex-wrap:wrap; gap:6px;">
+      <span style="font-size:11.5px; color:#cbd5e1; font-weight:700;">📑 套图页数：</span>
+      <button type="button" class="hook-pill active" data-comm-slide="0" onclick="setCommercialSlideCount(0)">🎲 2/3/4页混排 (推荐)</button>
+      <button type="button" class="hook-pill" data-comm-slide="2" onclick="setCommercialSlideCount(2)">⚡ 2页极速</button>
+      <button type="button" class="hook-pill" data-comm-slide="3" onclick="setCommercialSlideCount(3)">🔥 3页主力</button>
+      <button type="button" class="hook-pill" data-comm-slide="4" onclick="setCommercialSlideCount(4)">🛍️ 4页多款</button>
+    </div>
+    <label id="commRealDiscountWrap" class="comm-discount-toggle">
+      <input type="checkbox" id="chkRealDiscount" onchange="COMM_ALLOW_REAL_DISCOUNT=!!this.checked">
+      <span>🏷️ 允许叠加<b>官方实测真实折扣标</b>（仅当商品存在 <code>original_price &gt; real_price</code> 时生成，否则自动保持纯无价实景，严禁脑补假券）</span>
+    </label>
 
     <!-- Expanded ONLY when T6 Custom/Link Hook is selected -->
     <div id="selfHookSection" class="hook-section" style="display:none;">
@@ -570,6 +674,63 @@
 
   <button id="selfSubmitBtn" class="btn btn-primary" style="padding:15px 16px; font-size:16px;" onclick="submitSelfPids()">👆 请先在上方选一个高佣商品</button>
   <div id="selfTaskBox" class="self-status" style="display:none;"></div>
+</div>
+
+<!-- TAB 3 (Commercial): Hot-Swappable Product Pool & 6-Slot Mother Scene Gacha Review -->
+<div id="viewCommercial" style="display:none;">
+  <div class="card">
+    <div class="studio-step-hdr">
+      <div class="studio-step-title">🗂️ 热插拔商单品池（类目锁定 · PID 随时替换）</div>
+      <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
+        <span class="studio-step-sub" id="commPoolStats" style="white-space:nowrap;">加载中...</span>
+        <button type="button" class="hook-mini-btn" style="white-space:nowrap;" onclick="toggleCommProdForm()">➕ 加品/改品</button>
+      </div>
+    </div>
+
+    <div id="commFormBox" class="comm-form-box">
+      <div style="font-size:12.5px; font-weight:800; color:#f8fafc; margin-bottom:8px;">📌 录入 / 更新商单款（自动拉 EchoTik 图，也可手动传商家白底图）</div>
+      <div class="comm-form-grid">
+        <input id="cfPid" class="comm-inp" type="text" placeholder="商品 PID 或 TikTok 链接 (必填)">
+        <input id="cfCnName" class="comm-inp" type="text" placeholder="中文备注 (如: 胸毛整蛊卫衣)">
+        <input id="cfShop" class="comm-inp" type="text" placeholder="店铺名 (如: GrivGear)">
+        <select id="cfCluster" class="comm-sel">
+          <option value="prank">🎭 整蛊3D错觉</option>
+          <option value="holiday_fandom">🎄 绿毛怪 &amp; 书粉丑毛衣</option>
+          <option value="football">🏈 32城橄榄球卫衣</option>
+        </select>
+        <select id="cfStatus" class="comm-sel">
+          <option value="active">🟢 已启用 (主推做图)</option>
+          <option value="candidate">🟡 候选待定</option>
+          <option value="paused">⏸️ 暂停使用</option>
+        </select>
+        <input id="cfRealPrice" class="comm-inp" type="text" placeholder="实售价 (如 $29.99, 可选)">
+        <input id="cfOrigPrice" class="comm-inp" type="text" placeholder="官方原价 (仅真实划线价才填)">
+        <input id="cfTargetUrl" class="comm-inp" type="text" placeholder="商家定向链接 URL (推荐填)">
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+        <input id="cfRefFiles" type="file" accept="image/*" multiple style="display:none;" onchange="handleCommFormFiles(event)">
+        <button type="button" class="hook-mini-btn" onclick="document.getElementById('cfRefFiles').click()">📷 上传商家原图（可选，最多6张）</button>
+        <span id="cfRefCount" style="font-size:11.5px; color:#94a3b8;">未选择本地图（默认自动走 EchoTik 拉图）</span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button type="button" id="cfSubmitBtn" class="btn btn-primary" style="flex:1; margin-bottom:0;" onclick="submitCommercialProductForm()">💾 保存并拉图建档</button>
+        <button type="button" class="hook-mini-btn" style="padding:10px 14px;" onclick="toggleCommProdForm(false)">收起</button>
+      </div>
+    </div>
+
+    <div id="commProdFilterRow" class="filter-pills"></div>
+    <div id="commProdList" style="max-height:290px; overflow-y:auto; padding-right:2px;">
+      <div style="padding:16px; text-align:center; color:#94a3b8; font-size:12.5px;">⚡ 正在加载商单品池...</div>
+    </div>
+  </div>
+
+  <div class="card" id="commMotherSec">
+    <div class="studio-step-hdr">
+      <div class="studio-step-title" id="commMotherTitle">🎲 单品 6 槽位 AI 母图抽卡审核</div>
+      <div class="studio-step-sub" id="commMotherSub">请先在上方点击任意商品的「抽卡审图」</div>
+    </div>
+    <div id="commMotherBody"></div>
+  </div>
 </div>
 
 <!-- TAB 2: Free-Form Gemini Image Studio -->
@@ -741,6 +902,15 @@ let GENAI_LOADING = false;
 let GENAI_SUBMITTING = false;
 let GENAI_DROPZONE_BOUND = false;
 
+let COMM_STATUS = null;
+let COMM_SELECTED_PID = "";
+let COMM_MOTHER_DATA = null;
+let COMM_PROD_FILTER = "all";
+let COMM_POLL_TIMER = null;
+let COMM_ALLOW_REAL_DISCOUNT = false;
+let COMM_SLIDE_COUNT = 0;
+let COMM_FORM_REF_B64S = [];
+
 function activeToken() { return ADMIN_TOKEN || TEAM_TOKEN || ""; }
 function hasAnyAuth() { return !!(activeToken() || LEGACY_SECRET || AUTH_STATE.sample_preview); }
 function authHeaders(extra) {
@@ -826,15 +996,50 @@ function resolveIdentity() {
   ACCT = acct; LEGACY_SECRET = tok;
   applyBranding();
 }
+function isCommercialAccount(acctArg) {
+  const k = String(acctArg || ACCT || "").trim();
+  const list = Array.isArray(AUTH_STATE.commercial_accounts) ? AUTH_STATE.commercial_accounts : [];
+  return !!k && list.includes(k);
+}
+function getCommercialOperatorLabel(acctArg) {
+  const k = String(acctArg || ACCT || "").trim();
+  const ops = (AUTH_STATE.commercial_project && Array.isArray(AUTH_STATE.commercial_project.operators))
+    ? AUTH_STATE.commercial_project.operators : [];
+  for (const op of ops) {
+    if (Array.isArray(op.accounts) && op.accounts.map(String).includes(k)) return op.name || op.id || "";
+  }
+  return "";
+}
+function switchCommercialAccount(targetAcct) {
+  const clean = sanitizeAcct(targetAcct);
+  if (!clean || clean === ACCT) return;
+  stopSelfPolling();
+  stopCommPolling();
+  ACCT = clean;
+  SELECTED_CAT_PID = ""; SELECTED_CAT_ITEM = null;
+  CATALOG_DATA = null; CATALOG_FILTER = "all";
+  COMM_STATUS = null; COMM_SELECTED_PID = ""; COMM_MOTHER_DATA = null;
+  try { localStorage.setItem("tk_pick_last_acct", ACCT); history.replaceState(null, "", location.pathname + `?acct=${encodeURIComponent(ACCT)}`); } catch (e) {}
+  applyBranding();
+  boot();
+}
 function applyBranding() {
   const label = ACCT ? `${ACCT}号机` : "矩阵手机";
-  document.title = `📱 ${label} · 自选无损领料台`;
+  const isComm = isCommercialAccount();
+  const opName = isComm ? getCommercialOperatorLabel(ACCT) : "";
+  document.title = isComm
+    ? `潮链&拓飞 · ${label}${opName ? ` (${opName})` : ""}`
+    : `📱 ${label} · 自选无损领料台`;
   const metaTitle = document.getElementById("metaAppTitle");
-  if (metaTitle) metaTitle.setAttribute("content", ACCT ? `${ACCT}领料台` : "矩阵领料台");
+  if (metaTitle) metaTitle.setAttribute("content", isComm ? `商单${label}` : (ACCT ? `${ACCT}领料台` : "矩阵领料台"));
   const hdrTitle = document.getElementById("hdrTitle");
-  if (hdrTitle) hdrTitle.textContent = `📱 ${label} · 自选领料台`;
+  if (hdrTitle) {
+    hdrTitle.textContent = isComm
+      ? `潮链&拓飞 · 商单领料台 · ${label}${opName ? ` (${opName})` : ""}`
+      : `📱 ${label} · 自选领料台`;
+  }
   const badgeAcct = document.getElementById("badgeAcct");
-  if (badgeAcct) badgeAcct.textContent = ACCT || "--";
+  if (badgeAcct) badgeAcct.textContent = isComm ? `${label}${opName ? `·${opName}` : ""}` : (ACCT || "--");
 }
 function bindManualAcct() {
   const inp = document.getElementById("manualAcctInput");
@@ -845,34 +1050,65 @@ function bindManualAcct() {
   applyBranding(); boot();
 }
 function isGenaiAllowed() {
+  if (isCommercialAccount()) return true;
   const allowed = Array.isArray(AUTH_STATE.genai_allowed_accounts) ? AUTH_STATE.genai_allowed_accounts : ["240", "417"];
   return allowed.includes(ACCT);
 }
 function applyGenaiVisibility() {
+  const isComm = isCommercialAccount();
   const ok = isGenaiAllowed();
-  const bg = document.getElementById("tabBtnGenai");
   const mt = document.getElementById("mainTabs");
+  const bq = document.getElementById("tabBtnQueue");
+  const bs = document.getElementById("tabBtnStudio");
+  const bc = document.getElementById("tabBtnCommercial");
+  const bg = document.getElementById("tabBtnGenai");
   const vg = document.getElementById("viewGenai");
+  const vc = document.getElementById("viewCommercial");
+  const sw = document.getElementById("commSwitcherBar");
+  const sc = document.getElementById("commSprintCard");
+  const rdw = document.getElementById("commRealDiscountWrap");
+  const smr = document.getElementById("commSlideMixRow");
+
+  if (bc) bc.style.display = isComm ? "" : "none";
   if (bg) bg.style.display = ok ? "" : "none";
-  if (mt) mt.style.gridTemplateColumns = ok ? "repeat(3, 1fr)" : "1fr 1fr";
+  if (sw) sw.style.display = isComm ? "flex" : "none";
+  if (sc) sc.style.display = isComm ? "block" : "none";
+  if (rdw) rdw.style.display = isComm ? "flex" : "none";
+  if (smr) smr.style.display = isComm ? "flex" : "none";
   if (!ok && vg) vg.style.display = "none";
+  if (!isComm && vc) vc.style.display = "none";
+
+  if (isComm) {
+    if (bq) bq.style.order = "1";
+    if (bs) { bs.style.order = "2"; bs.textContent = "✨ 商单出图"; }
+    if (bc) { bc.style.order = "3"; bc.textContent = "🗂️ 品池抽卡"; }
+    if (bg) { bg.style.order = "4"; bg.textContent = "🎨 AI生图"; }
+    if (mt) mt.style.gridTemplateColumns = "repeat(4, 1fr)";
+  } else {
+    if (bq) bq.style.order = "";
+    if (bs) { bs.style.order = ""; bs.textContent = "✨ 选品出图"; }
+    if (bc) bc.style.order = "";
+    if (bg) { bg.style.order = ""; bg.textContent = "🎨 AI生图"; }
+    if (mt) mt.style.gridTemplateColumns = ok ? "repeat(3, 1fr)" : "1fr 1fr";
+  }
 }
 function updateConnSub() {
   const sub = document.getElementById("connSub");
   const pending = ITEMS.filter(x => !x.published).length;
+  const isComm = isCommercialAccount();
   if (sub) {
     sub.textContent = PICKUP_PAUSED_MSG
       ? (isGenaiAllowed() ? `🟡 套图暂缓升级 · 🎨 AI自由生图正常可用` : `🟡 套图暂缓升级中`)
-      : `🟢 已连接 · 待发 ${pending} 套${LAST_SERVER_TIME ? ` (${LAST_SERVER_TIME})` : ""}`;
+      : `${isComm ? "🎯 商单定向链接模式 · " : ""}🟢 已连接 · 待发 ${pending} 套${LAST_SERVER_TIME ? ` (${LAST_SERVER_TIME})` : ""}`;
   }
   const tabQ = document.getElementById("tabBtnQueue");
-  if (tabQ) tabQ.textContent = PICKUP_PAUSED_MSG ? `📦 队列(暂停)` : `📦 待发 (${pending})`;
+  if (tabQ) tabQ.textContent = PICKUP_PAUSED_MSG ? `📦 队列(暂停)` : `${isComm ? "📦 待发队列" : "📦 待发"} (${pending})`;
 }
 
 function renderQuotaBar() {
   const bar = document.getElementById("quotaBar");
   if (!bar) return;
-  if (ACTIVE_TAB === "genai" || !CATALOG_QUOTA) { bar.style.display = "none"; return; }
+  if (ACTIVE_TAB === "genai" || isCommercialAccount() || !CATALOG_QUOTA) { bar.style.display = "none"; return; }
   const q = CATALOG_QUOTA;
   bar.style.display = "flex";
   const aiRem = Number(q.account_ai_new_remaining || 0);
@@ -886,20 +1122,25 @@ function renderQuotaBar() {
 }
 
 function switchMainTab(tabName, isAuto) {
-  let target = (tabName === "studio" || tabName === "genai") ? tabName : "queue";
+  let target = (tabName === "studio" || tabName === "genai" || tabName === "commercial") ? tabName : "queue";
   if (target === "genai" && !isGenaiAllowed()) target = "queue";
+  if (target === "commercial" && !isCommercialAccount()) target = "queue";
   if (!isAuto) USER_SWITCHED_TAB = true;
   ACTIVE_TAB = target;
   const vs = document.getElementById("viewStudio");
+  const vc = document.getElementById("viewCommercial");
   const vg = document.getElementById("viewGenai");
   const vq = document.getElementById("viewQueue");
   const bs = document.getElementById("tabBtnStudio");
+  const bc = document.getElementById("tabBtnCommercial");
   const bg = document.getElementById("tabBtnGenai");
   const bq = document.getElementById("tabBtnQueue");
   if (vs) vs.style.display = (target === "studio") ? "block" : "none";
+  if (vc) vc.style.display = (target === "commercial") ? "block" : "none";
   if (vg) vg.style.display = (target === "genai") ? "block" : "none";
   if (vq) vq.style.display = (target === "queue") ? "block" : "none";
   if (bs) bs.classList.toggle("active", target === "studio");
+  if (bc) bc.classList.toggle("active", target === "commercial");
   if (bg) bg.classList.toggle("active", target === "genai");
   if (bq) bq.classList.toggle("active", target === "queue");
   renderQuotaBar();
@@ -911,8 +1152,11 @@ function switchMainTab(tabName, isAuto) {
         ? (isGenaiAllowed() ? `${PICKUP_PAUSED_MSG}（选品成片暂缓期间，可点上方「🎨 AI生图」自由出图）` : PICKUP_PAUSED_MSG)
         : "";
     }
+    if (isCommercialAccount()) renderCommercialStudioFilters();
     if (!CATALOG_DATA && !CATALOG_LOADING) loadCatalog(false);
     renderTemplatesGrid();
+  } else if (target === "commercial") {
+    loadCommercialStatus(true);
   } else if (target === "genai") {
     initGenaiTab();
   }
@@ -940,8 +1184,22 @@ async function loadCatalog(resetOffset = true) {
     if (totEl) totEl.textContent = String(data.total_catalog || 0);
     const cachedEl = document.getElementById("cachedCntPill");
     if (cachedEl) cachedEl.textContent = String(data.cached_count || 0);
+    const s1t = document.getElementById("studioStep1Title");
+    const s2t = document.getElementById("studioStep2Title");
+    const pHint = document.getElementById("pastePidHint");
+    if (data.commercial_mode) {
+      if (s1t) s1t.innerHTML = `① 选商单产品出图（当前池 <span id="catTotalBadge">${Number(data.total_catalog || 0)}</span> 款 · 可在「品池抽卡」随时增删）`;
+      if (s2t) s2t.textContent = "② 选爆款图文框架（@ehotty 真实爆款结构 T11–T13 + 经典无价 T1–T9）";
+      if (pHint) pHint.innerHTML = "💡 临时新 PID 会跳过 TSP 生码，直接使用商家定向链接，并自动调用 AI 实景生母图";
+      renderCommercialStudioFilters();
+    } else {
+      if (s1t) s1t.innerHTML = `① 挑高佣商品（内置 <span id="catTotalBadge">${Number(data.total_catalog || 0)}</span> 个现货高佣品）`;
+      if (s2t) s2t.textContent = "② 选 1 个无价爆款模板（10 大验证框架 · 0 额外生图费）";
+      if (pHint) pHint.innerHTML = "💡 粘库外新 PID 将占用今日 <b>AI 现生新品额</b> 并后台拿 TSP 高佣码（约 35–60 秒）";
+      renderStandardStudioFilters(Number(data.cached_count || 0));
+    }
     const subEl = document.getElementById("catMatchSub");
-    if (subEl) subEl.textContent = `匹配 ${data.matched_count || 0} 个 · 秒出置顶`;
+    if (subEl) subEl.textContent = data.commercial_mode ? `匹配 ${data.matched_count || 0} 款 · 已启用置顶` : `匹配 ${data.matched_count || 0} 个 · 秒出置顶`;
     if (SELECTED_CAT_PID) {
       const updatedSel = CATALOG_ITEMS.find(x => x.pid === SELECTED_CAT_PID);
       if (updatedSel) SELECTED_CAT_ITEM = updatedSel;
@@ -1018,9 +1276,13 @@ function renderSelectedProdBar() {
   if (!SELECTED_CAT_ITEM) { bar.style.display = "none"; bar.innerHTML = ""; return; }
   const it = SELECTED_CAT_ITEM;
   const tUrl = imgAuthUrl(it.thumb_url);
+  const isComm = isCommercialAccount();
   const modeBadge = it.has_ai_scenes
-    ? `<span class="c-badge cb-cached">⚡ 已有实景秒出 · 0成本</span>`
-    : `<span class="c-badge cb-ai">✨ 首次AI现生 ~35s</span>`;
+    ? `<span class="c-badge cb-cached">⚡ 母图就绪 (${Number(it.ready_scene_count || it.scene_count || 3)}张) · 0成本</span>`
+    : `<span class="c-badge cb-ai">${isComm ? "✨ 待抽 3 张母图" : "✨ 首次AI现生 ~35s"}</span>`;
+  const midBadge = isComm
+    ? `<span class="c-badge cb-comm">${esc(it.cluster_label || "商单类目")}</span><span class="c-badge cb-pick">${it.target_url ? "🔗 定链已填" : "🔗 待补定链"}</span>${it.has_verified_discount ? `<span class="c-badge cb-cached">🏷️ 有实测折扣</span>` : ""}`
+    : `<span class="c-badge cb-comm">💎 ${esc(it.partner_commission || it.partner_commission_num)}% 佣</span><span class="c-badge cb-pick">今日 ${it.today_picks}/${it.max_daily_picks}</span>`;
   bar.style.display = "flex";
   bar.innerHTML = `
     <img src="${tUrl}" alt="${esc(it.cn_name)}">
@@ -1028,8 +1290,7 @@ function renderSelectedProdBar() {
       <div style="font-size:13.5px; font-weight:800; color:#f8fafc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">✅ 已选：${esc(it.cn_name)}</div>
       <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:4px; align-items:center;">
         ${modeBadge}
-        <span class="c-badge cb-comm">💎 ${esc(it.partner_commission || it.partner_commission_num)}% 佣</span>
-        <span class="c-badge cb-pick">今日 ${it.today_picks}/${it.max_daily_picks}</span>
+        ${midBadge}
       </div>
     </div>
     <button type="button" class="hook-mini-btn" onclick="clearSelectedCatalogItem()">重选</button>
@@ -1044,25 +1305,30 @@ function renderCatalogGrid() {
     grid.innerHTML = `<div style="grid-column:1/-1; padding:18px; text-align:center; color:#94a3b8; font-size:12.5px;">未找到符合条件的商品，可清空搜索关键词重试</div>`;
     return;
   }
+  const isComm = isCommercialAccount();
   grid.innerHTML = CATALOG_ITEMS.map(it => {
     const sel = SELECTED_CAT_PID === it.pid;
     const pidJs = esc(escJs(it.pid));
     const tUrl = imgAuthUrl(it.thumb_url);
     const aiBadge = it.has_ai_scenes
-      ? `<span class="c-badge cb-cached">⚡ 已有实景秒出</span>`
-      : `<span class="c-badge cb-ai">✨ 首次现生 ~35s</span>`;
-    const pickBadge = it.full_today
-      ? `<span class="c-badge cb-full">今日已满 ${it.today_picks}/${it.max_daily_picks}</span>`
-      : `<span class="c-badge cb-pick">已选 ${it.today_picks}/${it.max_daily_picks}</span>`;
+      ? (isComm
+          ? `<span class="c-badge cb-cached">⚡ 母图就绪 ${Number(it.ready_scene_count || it.scene_count || 3)}张</span>`
+          : `<span class="c-badge cb-cached">⚡ 已有实景秒出</span>`)
+      : `<span class="c-badge cb-ai">${isComm ? "✨ 待生母图" : "✨ 首次现生 ~35s"}</span>`;
+    const subTxt = isComm
+      ? `${esc(it.shop_name || "商单店")} · ${it.real_price ? esc(it.real_price) : "以TikTok实际价为准"} · 累计${fmtNum(it.sales)}套`
+      : `${esc(it.shop_name || "TikTok Shop")} · 销 ${fmtNum(it.sales)} · 存 ${fmtNum(it.stock)}`;
+    const tailBadges = isComm
+      ? `<span class="c-badge cb-comm">${esc(it.cluster_label || "商单")}</span><span class="c-badge ${it.status === 'active' ? 'cb-cached' : 'cb-pick'}">${it.status === 'active' ? '已启用' : (it.status === 'paused' ? '已暂停' : '候选')}</span>`
+      : `<span class="c-badge cb-comm">💎 ${esc(it.partner_commission || it.partner_commission_num)}%</span>${it.full_today ? `<span class="c-badge cb-full">今日已满 ${it.today_picks}/${it.max_daily_picks}</span>` : `<span class="c-badge cb-pick">已选 ${it.today_picks}/${it.max_daily_picks}</span>`}`;
     return `<div class="cat-item ${sel ? 'selected' : ''} ${it.full_today ? 'is-full' : ''}" data-pid="${esc(it.pid)}" onclick="selectCatalogItem('${pidJs}')">
       <img class="cat-thumb" src="${tUrl}" loading="lazy" alt="${esc(it.cn_name)}">
       <div class="cat-info">
         <div class="cat-name">${esc(it.cn_name)}</div>
-        <div class="cat-sub">${esc(it.shop_name || "TikTok Shop")} · 销 ${fmtNum(it.sales)} · 存 ${fmtNum(it.stock)}</div>
+        <div class="cat-sub">${subTxt}</div>
         <div class="cat-badges">
           ${aiBadge}
-          <span class="c-badge cb-comm">💎 ${esc(it.partner_commission || it.partner_commission_num)}%</span>
-          ${pickBadge}
+          ${tailBadges}
         </div>
       </div>
     </div>`;
@@ -1094,13 +1360,14 @@ function renderTemplatesGrid() {
   ];
   const tpls = (CATALOG_TEMPLATES && CATALOG_TEMPLATES.length) ? CATALOG_TEMPLATES : fallbackTpls;
   const isAuto = SELECTED_TPL_ID === "auto";
+  const isComm = isCommercialAccount();
   const cards = [];
   cards.push(`<div class="tpl-card ${isAuto ? 'selected' : ''}" data-tpl="auto" onclick="selectTemplate('auto')">
     <div class="tpl-tag">${isAuto ? '✓ 智能推荐' : '防撞优选'}</div>
     <div class="tpl-auto-box">
       <div style="font-size:26px;">🎲</div>
       <div style="font-size:12px; font-weight:800; color:#f8fafc;">智能轮换模板</div>
-      <div style="font-size:10px; color:#94a3b8; line-height:1.3;">自动错开 9 大爆款框架与顺序</div>
+      <div style="font-size:10px; color:#94a3b8; line-height:1.3;">${isComm ? "优先 @ehotty + 经典框架防重" : "自动错开 9 大爆款框架与顺序"}</div>
     </div>
     <div class="tpl-cap"><div class="tpl-name">智能推荐</div><div class="tpl-sub">零配置防内卷</div></div>
   </div>`);
@@ -1122,23 +1389,36 @@ function renderTemplatesGrid() {
   grid.innerHTML = cards.join("");
 }
 
+function setCommercialSlideCount(cnt) {
+  COMM_SLIDE_COUNT = Number(cnt || 0);
+  document.querySelectorAll("#commSlideMixRow [data-comm-slide]").forEach(btn => {
+    btn.classList.toggle("active", Number(btn.getAttribute("data-comm-slide") || 0) === COMM_SLIDE_COUNT);
+  });
+  updateStudioSubmitCta();
+}
 function updateStudioSubmitCta() {
   const btn = document.getElementById("selfSubmitBtn");
   if (!btn) return;
+  const isComm = isCommercialAccount();
   const pasteInp = document.getElementById("selfPidInput");
   const pasteTxt = (CATALOG_FILTER === "paste" && pasteInp) ? pasteInp.value.trim() : "";
   if (!SELECTED_CAT_ITEM && !pasteTxt) {
     btn.className = "btn btn-primary";
-    btn.textContent = "👆 请先在上方选一个高佣商品";
+    btn.textContent = isComm ? "👆 请先在上方选一个商单款（或粘新 PID）" : "👆 请先在上方选一个高佣商品";
     return;
   }
   const tplTag = SELECTED_TPL_ID === "auto" ? "智能模板" : SELECTED_TPL_ID;
+  const slideDesc = COMM_SLIDE_COUNT === 0 ? "2/3/4页混排" : `${COMM_SLIDE_COUNT}页`;
   if (SELECTED_CAT_ITEM && SELECTED_CAT_ITEM.has_ai_scenes) {
     btn.className = "btn btn-emerald";
-    btn.textContent = `⚡ 立即生成套图 · ${tplTag}（0 成本秒出）`;
+    btn.textContent = isComm
+      ? `⚡ 用母图 0 成本出 ${slideDesc} · ${tplTag}（自动错重入待发）`
+      : `⚡ 立即生成套图 · ${tplTag}（0 成本秒出）`;
   } else {
     btn.className = "btn btn-primary";
-    btn.textContent = `✨ AI 现生 3 张实景 + ${tplTag}（约 35 秒 · 占 1 个新品额）`;
+    btn.textContent = isComm
+      ? `✨ AI 现生 3 张母图 + ${tplTag} (${slideDesc}·自动选图)`
+      : `✨ AI 现生 3 张实景 + ${tplTag}（约 35 秒 · 占 1 个新品额）`;
   }
 }
 
@@ -1374,6 +1654,16 @@ function openSlideLightbox(pid, vid, slideName, titleTxt) {
   document.getElementById("btnLightboxDeleteCustom").style.display = "none";
   document.getElementById("hookLightbox").style.display = "flex";
 }
+function openDirectImgLightbox(url, titleTxt, subTxt) {
+  _resetLightboxExtraBtns();
+  lightboxMode = "direct"; lightboxTargetId = "";
+  document.getElementById("hookLightboxImg").src = imgAuthUrl(url);
+  document.getElementById("hookLightboxTitle").textContent = titleTxt || "母图 / 原图预览";
+  document.getElementById("hookLightboxSub").textContent = subTxt || "核对版型印花比例与真图一致性";
+  document.getElementById("btnLightboxConfirm").style.display = "none";
+  document.getElementById("btnLightboxDeleteCustom").style.display = "none";
+  document.getElementById("hookLightbox").style.display = "flex";
+}
 function openGenaiLightbox(kind, acct, filename, titleTxt, subTxt) {
   _resetLightboxExtraBtns();
   lightboxMode = "genai"; lightboxTargetId = filename || "";
@@ -1523,6 +1813,8 @@ async function submitSelfPids() {
         engine: "ai_scene",
         template_id: SELECTED_TPL_ID || "auto",
         scene_count: 3,
+        slide_count: isCommercialAccount() ? COMM_SLIDE_COUNT : 0,
+        allow_real_discount: isCommercialAccount() && COMM_ALLOW_REAL_DISCOUNT,
         hook_mode: postHookMode,
         hook_id: postHookId,
         hook_text_mode: "clean",
@@ -1607,11 +1899,29 @@ function preloadItemSlides(item) {
   if (preloadedFiles[key] && preloadedFiles[key].length) return Promise.resolve(preloadedFiles[key]);
   if (preloadPromises[key]) return preloadPromises[key];
   const domId = domIdOfKey(key);
+  const isVideo = (item.media_type === "video" && !!item.video_name);
   const p = (async () => {
     const statusEl = document.getElementById(`preload-status-${domId}`);
     const saveBtn = document.getElementById(`save-btn-${domId}`);
     const files = [];
     try {
+      if (isVideo) {
+        const mbTxt = item.video_size_kb ? `${(Number(item.video_size_kb) / 1024).toFixed(1)} MB` : "MP4";
+        if (statusEl) statusEl.textContent = `⚡ 正在预加载无损视频 (${mbTxt})...`;
+        const url = apiUrl(`/raw/${encodeURIComponent(item.pid)}/${encodeURIComponent(itemVariant(item))}/${encodeURIComponent(item.video_name)}?t=${Date.now()}`);
+        const resp = await fetch(url, { cache: "no-store", headers: authHeaders() });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const blob = await resp.blob();
+        const cleanFile = `${item.pid}_${itemVariant(item)}.mp4`.replace(/[^a-zA-Z0-9_.-]/g, "_");
+        files.push(new File([blob], cleanFile, { type: "video/mp4" }));
+        if (!getItemByKey(key)) return [];
+        preloadedFiles[key] = files;
+        const cs = document.getElementById(`preload-status-${domId}`), cb = document.getElementById(`save-btn-${domId}`);
+        const gotMb = (blob.size / (1024 * 1024)).toFixed(1);
+        if (cs) cs.textContent = `✅ 无损 MP4 视频已就绪 (${gotMb} MB)`;
+        if (cb) cb.innerHTML = `📥 一键存视频到系统相册 (${gotMb} MB)`;
+        return files;
+      }
       for (let i = 0; i < item.slide_names.length; i++) {
         const sname = item.slide_names[i];
         if (statusEl) statusEl.textContent = `⚡ 正在预加载无损原图 (${i+1}/${item.slide_names.length})...`;
@@ -1629,8 +1939,10 @@ function preloadItemSlides(item) {
       return files;
     } catch (err) {
       const cs = document.getElementById(`preload-status-${domId}`), cb = document.getElementById(`save-btn-${domId}`);
-      if (cs) cs.textContent = `⚠️ 预加载中断 (${err.message})，可点下方重试或长按单图保存`;
-      if (cb) cb.innerHTML = `🔄 点击重试加载整套原图`;
+      if (cs) cs.textContent = isVideo
+        ? `⚠️ 视频预加载中断 (${err.message})，可点下方重试或用备用下载`
+        : `⚠️ 预加载中断 (${err.message})，可点下方重试或长按单图保存`;
+      if (cb) cb.innerHTML = isVideo ? `🔄 点击重试加载 MP4 视频` : `🔄 点击重试加载整套原图`;
       return [];
     } finally { delete preloadPromises[key]; }
   })();
@@ -1652,17 +1964,26 @@ function drainPreloadQueue() {
 }
 async function saveAllSlides(key) {
   const item = getItemByKey(key); if (!item) return;
+  const isVideo = (item.media_type === "video" && !!item.video_name);
   const files = preloadedFiles[key];
   if (files && files.length) {
     if (navigator.canShare && navigator.canShare({ files })) {
-      try { await navigator.share({ files }); showToast("🎉 在弹出菜单点「存储 " + files.length + " 张图像」即全进相册！"); return; }
-      catch (err) { if (err && err.name === "AbortError") return; }
+      try {
+        await navigator.share({ files });
+        showToast(isVideo ? "🎉 在弹出菜单点「存储视频」即存进系统相册！" : "🎉 在弹出菜单点「存储 " + files.length + " 张图像」即全进相册！");
+        return;
+      } catch (err) { if (err && err.name === "AbortError") return; }
+    }
+    if (isVideo) {
+      _triggerBrowserDownload(files[0], files[0].name || "clip.mp4");
+      showToast("📥 已触发 MP4 直接下载！", "#3b82f6");
+      return;
     }
     showToast("💡 请点击/长按下方 P1~P" + files.length + " 缩略图保存", "#f59e0b");
     return;
   }
   const loaded = await preloadItemSlides(item);
-  if (loaded && loaded.length) showToast("✅ 原图已就绪，请再点一次保存");
+  if (loaded && loaded.length) showToast(isVideo ? "✅ 视频已就绪，请再点一次存进相册" : "✅ 原图已就绪，请再点一次保存");
 }
 
 async function reportAction(key, action) {
@@ -1697,6 +2018,7 @@ async function reportAction(key, action) {
         }
         updateConnSub();
         showToast("✅ 已同步发帖状态回工作台！");
+        if (isCommercialAccount()) loadCommercialStatus(true);
       } else {
         showToast("✅ 已记录加橱窗！");
       }
@@ -1706,25 +2028,97 @@ async function reportAction(key, action) {
 
 function renderCardHtml(it) {
   const key = itemKey(it), keyJs = esc(escJs(key)), domId = domIdOfKey(key);
+  const pidJsOnly = esc(escJs(it.pid));
   const isPreloaded = !!(preloadedFiles[key] && preloadedFiles[key].length);
-  const fallbackUrl = (it.tsp && it.tsp.share_url) ? it.tsp.share_url : (`${BASE_TUNNEL}/go_showcase/${encodeURIComponent(it.pid)}`);
-  const isRealTsp = !!(it.tsp && it.tsp.share_url && it.tsp.is_tsp !== false);
-  const tspBtn = isRealTsp
-    ? `<a class="btn btn-amber" href="${esc(it.tsp.share_url)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">💎 未挂车点此：直跳 TSP 高佣加橱窗 (${esc(it.tsp.partner_commission)}%+${esc(it.tsp.creator_commission)}%)</a>`
-    : `<a class="btn btn-amber" href="${esc(fallbackUrl)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">🛒 未挂车点此：直跳 TikTok 达人加橱窗 (公开计划)</a>`;
+  const isVideo = (it.media_type === "video" && !!it.video_name);
+  const isNoCart = !!it.no_cart || isVideo;
+  const comm = it.commercial || null;
+  let linkSection = "";
+  let commBadges = "";
+  let commGuardHtml = "";
 
-  const thumbs = it.slide_names.map((sn, sIdx) => {
-    const rawUrl = imgAuthUrl(`/raw/${encodeURIComponent(it.pid)}/${encodeURIComponent(itemVariant(it))}/${encodeURIComponent(sn)}`);
-    const snJs = esc(escJs(sn)), pidJs = esc(escJs(it.pid)), vidJs = esc(escJs(itemVariant(it))), cnJs = esc(escJs(`${it.cn_name} · P${sIdx+1}`));
-    return `<div class="slide-thumb-wrap" onclick="openSlideLightbox('${pidJs}', '${vidJs}', '${snJs}', '${cnJs}')">
-      <img src="${rawUrl}" loading="lazy" alt="P${sIdx+1}">
-      <div class="slide-cap">P${sIdx+1} (${it.slide_sizes_kb[sIdx]}KB)</div>
-    </div>`;
-  }).join("");
+  if (isNoCart) {
+    linkSection = `<div class="no-cart-banner">🎬 <b>无车日常空镜垫片 · 活跃养号（严禁挂小黄车）</b><br><span style="font-size:11.5px;font-weight:500;color:#cbd5e1;">直接存视频进系统相册 → TikTok 发短视频 → 留空 0 字正文 + 轻配热门音乐即可（每 4–5 条挂车图文插 1 条）。</span></div>`;
+  } else if (comm && comm.is_commercial) {
+    if (comm.cluster_label) commBadges += `<span class="tag tag-pink">${esc(comm.cluster_label)}</span>`;
+    if (comm.commission_desc) commBadges += `<span class="tag" style="background:rgba(245,158,11,0.18);color:#fde68a;border-color:rgba(245,158,11,0.4);">${esc(comm.commission_desc)}</span>`;
+    commBadges += `<span class="tag" style="background:rgba(16,185,129,0.16);color:#6ee7b7;border-color:rgba(16,185,129,0.4);">🔗 定向链接·免TSP</span>`;
+    if (comm.cluster_guard) {
+      commGuardHtml = `<div class="comm-guard-strip">🛡️ <b>审核提醒：</b>${esc(comm.cluster_guard)}</div>`;
+    }
+    const tUrl = String(comm.target_url || "").trim();
+    const tUrlJs = esc(escJs(tUrl));
+    const tapQrBtn = comm.tap_qr_url
+      ? `<button type="button" class="hook-mini-btn" style="padding:10px 10px;" onclick="openDirectImgLightbox('${esc(escJs(comm.tap_qr_url))}','线下TAP二维码 · ${esc(escJs(it.cn_name || it.pid))}','扫码直接加高佣橱窗${comm.commission_desc ? ` · ${esc(escJs(comm.commission_desc))}` : ""}')">📷 扫线下TAP码</button>`
+      : "";
+    if (tUrl) {
+      linkSection = `<div class="step-label">🔗 商家定向链接加橱窗（跳过公开佣金 / 免 TSP 码）</div>
+      <div class="comm-target-box">
+        <div style="font-size:11px; color:#93c5fd; word-break:break-all;">${esc(tUrl)}</div>
+        <div class="comm-target-acts">
+          <a class="btn btn-amber" style="flex:1; margin-bottom:0;" href="${esc(tUrl)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">🔗 打开定向链接加车</a>
+          ${tapQrBtn}
+          <button type="button" class="hook-mini-btn" style="padding:10px 12px;" onclick="copyCommercialUrl('${tUrlJs}')">📋 复制</button>
+          <button type="button" class="hook-mini-btn" style="padding:10px 12px;" onclick="editCommercialTargetUrl('${pidJsOnly}')">✏️ 改链</button>
+        </div>
+      </div>`;
+    } else {
+      linkSection = `<div class="step-label">🔗 商家定向链接加橱窗</div>
+      <div class="comm-target-box" style="border-color:rgba(245,158,11,0.45);">
+        <div style="font-size:11.5px; color:#fde68a;">⚠️ 该款尚未录入商家定向链接（可直接粘贴一次，全队 6 号共用）</div>
+        <div class="comm-target-acts">
+          <button type="button" class="btn btn-amber" style="flex:1; margin-bottom:0;" onclick="editCommercialTargetUrl('${pidJsOnly}')">✏️ 补填商家定向链接</button>
+          <a class="hook-mini-btn" style="padding:10px 12px; text-decoration:none;" href="${esc(`${BASE_TUNNEL}/go_showcase/${encodeURIComponent(it.pid)}`)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">🛒 橱窗兜底页</a>
+        </div>
+      </div>`;
+    }
+  } else {
+    const fallbackUrl = (it.tsp && it.tsp.share_url) ? it.tsp.share_url : (`${BASE_TUNNEL}/go_showcase/${encodeURIComponent(it.pid)}`);
+    const isCommercialTap = !!(it.tsp && it.tsp.is_commercial_tap && it.tsp.share_url);
+    const isRealTsp = !!(it.tsp && it.tsp.share_url && it.tsp.is_tsp !== false);
+    const tspBtn = isCommercialTap
+      ? `<a class="btn btn-amber" href="${esc(it.tsp.share_url)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">🎯 商单定链加车（与飞书表同链 · 线下9%+线上1%）</a>`
+      : (isRealTsp
+        ? `<a class="btn btn-amber" href="${esc(it.tsp.share_url)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">💎 未挂车点此：直跳 TSP 高佣加橱窗 (${esc(it.tsp.partner_commission)}%+${esc(it.tsp.creator_commission)}%)</a>`
+        : `<a class="btn btn-amber" href="${esc(fallbackUrl)}" target="_blank" onclick="reportAction('${keyJs}', 'cart')">🛒 未挂车点此：直跳 TikTok 达人加橱窗 (公开计划)</a>`);
+    linkSection = `<div class="step-label">🛒 橱窗挂车（若灵途尚未自动锁高佣入橱窗）</div>${tspBtn}`;
+  }
+
+  let mediaSection = "";
+  if (isVideo) {
+    const vidUrl = imgAuthUrl(`/raw/${encodeURIComponent(it.pid)}/${encodeURIComponent(itemVariant(it))}/${encodeURIComponent(it.video_name)}`);
+    const dlUrl = vidUrl + (vidUrl.includes("?") ? "&download=1" : "?download=1");
+    const posterAttr = it.poster_name
+      ? ` poster="${imgAuthUrl(`/raw/${encodeURIComponent(it.pid)}/${encodeURIComponent(itemVariant(it))}/${encodeURIComponent(it.poster_name)}`)}"`
+      : "";
+    const mbTxt = it.video_size_kb ? `${(Number(it.video_size_kb) / 1024).toFixed(1)} MB` : "MP4";
+    mediaSection = `
+      <div class="step-label">🎬 第一步：预览并一键存 MP4 视频到系统相册</div>
+      <div class="preload-bar" id="preload-status-${esc(domId)}">${isPreloaded ? `✅ 无损 MP4 视频已就绪 (${mbTxt})` : `💤 滑动到此自动预加载 (${mbTxt})，或直接点下方按钮`}</div>
+      <button id="save-btn-${esc(domId)}" class="btn btn-primary" onclick="saveAllSlides('${keyJs}')">📥 一键存视频到系统相册 (${mbTxt})</button>
+      <a class="btn btn-slate" href="${dlUrl}" download="${esc(`${it.pid}_${itemVariant(it)}.mp4`)}" style="padding:10px 12px; font-size:13px;">⬇️ 备用：浏览器直接下载 MP4</a>
+      <div class="video-preview-wrap">
+        <video class="video-preview-el" src="${vidUrl}"${posterAttr} controls playsinline muted loop preload="metadata"></video>
+      </div>`;
+  } else {
+    const thumbs = (it.slide_names || []).map((sn, sIdx) => {
+      const rawUrl = imgAuthUrl(`/raw/${encodeURIComponent(it.pid)}/${encodeURIComponent(itemVariant(it))}/${encodeURIComponent(sn)}`);
+      const snJs = esc(escJs(sn)), pidJs = esc(escJs(it.pid)), vidJs = esc(escJs(itemVariant(it))), cnJs = esc(escJs(`${it.cn_name} · P${sIdx+1}`));
+      return `<div class="slide-thumb-wrap" onclick="openSlideLightbox('${pidJs}', '${vidJs}', '${snJs}', '${cnJs}')">
+        <img src="${rawUrl}" loading="lazy" alt="P${sIdx+1}">
+        <div class="slide-cap">P${sIdx+1} (${it.slide_sizes_kb[sIdx]}KB)</div>
+      </div>`;
+    }).join("");
+    mediaSection = `
+      <div class="step-label">📸 第一步：存无损原图进系统相册（点击单图可放大核图）</div>
+      <div class="preload-bar" id="preload-status-${esc(domId)}">${isPreloaded ? `✅ ${it.slide_names.length} 张无损高清原图已就绪` : '💤 滑动到此自动预加载，或点下方按钮'}</div>
+      <button id="save-btn-${esc(domId)}" class="btn btn-primary" onclick="saveAllSlides('${keyJs}')">📥 一键存全套 ${it.slide_names.length} 张图到系统相册</button>
+      <div class="slides-strip" data-cols="${it.slide_names.length <= 3 ? '3' : (it.slide_names.length >= 5 ? '5' : '4')}">${thumbs}</div>`;
+  }
 
   const hasTitle = !!(it.title || "").trim(), hasCaption = !!(it.caption || "").trim();
   const copySection = (!hasTitle && !hasCaption)
-    ? `<div class="step-label">📋 第二步：发布文案说明</div><div class="zero-copy-hint">✨ 本套为「无价实景极简模式」：可留空直发，也可自行加简短心得</div>`
+    ? `<div class="step-label">📋 第二步：发布文案说明</div><div class="zero-copy-hint">${isVideo ? '✨ 零正文直发模式（0 字 Caption）：不填标题与正文，轻配音乐直接发布' : '✨ 零正文直发模式（0 字 Caption）：进 TikTok 选图 → 先挂橙色小黄车 → 搜商用音乐 → 标题正文留空直接发'}</div>`
     : `<div class="step-label">📋 第二步：复制无价标题与正文</div>
        <div class="copy-box"><div class="copy-hdr">📌 Title（标题）</div><div class="copy-txt">${esc(it.title || '(无标题)')}</div></div>
        <button class="btn btn-blue" onclick="copyItemField('${keyJs}', 'title', 'Title 标题')">📋 一键复制 Title 标题</button>
@@ -1735,6 +2129,20 @@ function renderCardHtml(it) {
   const costTag = it.cost_mode === "0token_reuse"
     ? `<span class="tag tag-green">⚡ 0成本复用</span>`
     : (it.cost_mode === "ai_new_build" ? `<span class="tag tag-amber">✨ AI新实景</span>` : "");
+  const countBadge = isVideo
+    ? `<span class="tag tag-green">🎬 MP4${it.duration_sec ? ` ${esc(String(it.duration_sec))}s` : ''} (${(Number(it.video_size_kb || 0) / 1024).toFixed(1)}MB)</span>`
+    : `<span class="tag tag-green">${esc(itemVariant(it).toUpperCase())} (${it.slide_names.length}张)</span>`;
+  const defectSection = isVideo ? "" : `
+    <details class="defect-details">
+      <summary><span>🔄 实景有瑕疵 / 想换套模板？</span><span style="font-size:11px; color:#64748b;">▾ 展开</span></summary>
+      <div class="defect-acts">
+        <button type="button" class="defect-btn" onclick="reportDefect('${keyJs}', 'swap_template')">🎲 0 成本秒换模板</button>
+        <button type="button" class="defect-btn warn" onclick="reportDefect('${keyJs}', 'regen_scenes')">⚠️ 实景穿帮·重生母图</button>
+      </div>
+    </details>`;
+  const bottomTip = isVideo
+    ? `<div class="help-tip" style="margin-bottom:10px;">🎬 <b>养号垫片节奏</b>：严禁挂小黄车，保持 0 字正文，轻配原声或舒缓热门音乐直接发。</div>`
+    : `<div class="help-tip" style="margin-bottom:10px;">🎵 <b>防静音铁律</b>：进 TikTok 选好图后，<b>先挂橙色小黄车，最后再去顶部搜商用音乐</b>。</div>`;
 
   return `<div class="card ${it.published ? 'is-done' : ''}" id="card-${esc(domId)}" data-item-key="${esc(key)}">
     <div class="prod-top">
@@ -1742,27 +2150,21 @@ function renderCardHtml(it) {
       <button class="btn-del" onclick="reportAction('${keyJs}', 'dismiss')">移出 ×</button>
     </div>
     <div class="prod-meta">
-      <span class="tag">PID: ${esc(it.pid)}</span>
-      <span class="tag tag-green">${esc(itemVariant(it).toUpperCase())} (${it.slide_names.length}张)</span>
+      <span class="tag">${isVideo ? 'ID' : 'PID'}: ${esc(it.pid)}</span>
+      ${countBadge}
+      ${isNoCart ? `<span class="tag tag-amber">🌿 无车养号</span>` : ''}
+      ${commBadges}
       ${tplTag}
       ${costTag}
       ${it.queued_at ? `<span class="tag">派单 ${esc(it.queued_at)}</span>` : ''}
       ${it.published ? `<span class="tag tag-green" data-pub-tag="1">✅ 本号已登记发帖</span>` : ''}
     </div>
-    ${tspBtn ? `<div class="step-label">🛒 橱窗挂车（若尚未加橱窗）</div>${tspBtn}` : ''}
-    <div class="step-label">📸 第一步：存无损原图进系统相册（点击单图可放大核图）</div>
-    <div class="preload-bar" id="preload-status-${esc(domId)}">${isPreloaded ? `✅ ${it.slide_names.length} 张无损高清原图已就绪` : '💤 滑动到此自动预加载，或点下方按钮'}</div>
-    <button id="save-btn-${esc(domId)}" class="btn btn-primary" onclick="saveAllSlides('${keyJs}')">📥 一键存全套 ${it.slide_names.length} 张图到系统相册</button>
-    <div class="slides-strip" data-cols="${it.slide_names.length <= 3 ? '3' : (it.slide_names.length >= 5 ? '5' : '4')}">${thumbs}</div>
+    ${commGuardHtml}
+    ${linkSection}
+    ${mediaSection}
     ${copySection}
-    <details class="defect-details">
-      <summary><span>🔄 实景有瑕疵 / 想换套模板？</span><span style="font-size:11px; color:#64748b;">▾ 展开</span></summary>
-      <div class="defect-acts">
-        <button type="button" class="defect-btn" onclick="reportDefect('${keyJs}', 'swap_template')">🎲 0 成本秒换模板</button>
-        <button type="button" class="defect-btn warn" onclick="reportDefect('${keyJs}', 'regen_scenes')">⚠️ 实景穿帮·重生母图</button>
-      </div>
-    </details>
-    <div class="help-tip" style="margin-bottom:10px;">🎵 <b>防静音铁律</b>：进 TikTok 选好图后，<b>先挂橙色小黄车，最后再去顶部搜商用音乐</b>。</div>
+    ${defectSection}
+    ${bottomTip}
     <button class="btn btn-green" data-pub-btn="1" onclick="reportAction('${keyJs}', 'publish')">${it.published ? '✅ 已登记发帖（电脑总控台已同步）' : '✅ 我已在手机发完帖（同步回电脑工作台）'}</button>
   </div>`;
 }
@@ -1827,6 +2229,9 @@ function renderAuthGate(scope, reasonMsg) {
   document.getElementById("mainTabs").style.display = "none";
   document.getElementById("quotaBar").style.display = "none";
   document.getElementById("viewStudio").style.display = "none";
+  const vc = document.getElementById("viewCommercial"); if (vc) vc.style.display = "none";
+  const sw = document.getElementById("commSwitcherBar"); if (sw) sw.style.display = "none";
+  const sc = document.getElementById("commSprintCard"); if (sc) sc.style.display = "none";
   const vg = document.getElementById("viewGenai");
   if (vg) vg.style.display = "none";
   document.getElementById("viewQueue").style.display = "block";
@@ -2322,6 +2727,7 @@ function renderGenaiHistory() {
           <button type="button" class="genai-mini-btn" onclick="saveGenaiImage('${acctJs}','${fnJs}')">📥 存图</button>
           <button type="button" class="genai-mini-btn" onclick="useGenaiOutputAsRef('${acctJs}','${fnJs}','继续改图')">✏️ 改图</button>
           <button type="button" class="genai-mini-btn wide" onclick="promoteGenaiToHook('${jidJs}','${fnJs}')">📌 设为 T6 首图去套模板</button>
+          ${isCommercialAccount() ? `<button type="button" class="genai-mini-btn wide" style="background:rgba(59,130,246,0.16);border-color:rgba(59,130,246,0.45);color:#bfdbfe;" onclick="promoteGenaiToMotherSlot('${acctJs}','${fnJs}')">🗂️ 填入商单母图槽位</button>` : ""}
         </div>
       </div>`;
     }).join("")}</div>` : `<div style="font-size:12px; color:#fca5a5;">${esc(job.stage_label || job.error || "未生成图片")}</div>`;
@@ -2515,7 +2921,7 @@ async function boot() {
     if (!BASE_TUNNEL) throw new Error("服务地址为空");
 
     try {
-      const aResp = await fetch(apiUrl(`/api/auth/status?t=${Date.now()}`), { cache: "no-store", headers: authHeaders() });
+      const aResp = await fetch(apiUrl(`/api/auth/status?acct=${encodeURIComponent(ACCT)}&t=${Date.now()}`), { cache: "no-store", headers: authHeaders() });
       if (aResp.ok) {
         const aData = await aResp.json();
         AUTH_STATE = aData || AUTH_STATE;
@@ -2525,6 +2931,7 @@ async function boot() {
 
     const sampleBadge = document.getElementById("badgeSample");
     if (sampleBadge) sampleBadge.style.display = AUTH_STATE.sample_preview ? "inline-block" : "none";
+    applyBranding();
     applyGenaiVisibility();
 
     const protList = Array.isArray(AUTH_STATE.protected_accounts) ? AUTH_STATE.protected_accounts : ["240", "417"];
@@ -2555,6 +2962,7 @@ async function boot() {
         document.getElementById("mainTabs").style.display = "none";
         document.getElementById("quotaBar").style.display = "none";
         document.getElementById("viewStudio").style.display = "none";
+        const vc = document.getElementById("viewCommercial"); if (vc) vc.style.display = "none";
         const vg = document.getElementById("viewGenai");
         if (vg) vg.style.display = "none";
         document.getElementById("viewQueue").style.display = "block";
@@ -2580,6 +2988,7 @@ async function boot() {
     renderItems();
     renderTemplatesGrid();
     loadCatalog(true);
+    if (isCommercialAccount()) loadCommercialStatus(true);
 
     if (!USER_SWITCHED_TAB) {
       const hasPending = ITEMS.some(x => !x.published);
@@ -2592,6 +3001,9 @@ async function boot() {
     sub.textContent = "🔴 领料服务暂未连接";
     document.getElementById("mainTabs").style.display = "none";
     document.getElementById("viewStudio").style.display = "none";
+    const vc = document.getElementById("viewCommercial"); if (vc) vc.style.display = "none";
+    const sw = document.getElementById("commSwitcherBar"); if (sw) sw.style.display = "none";
+    const sc = document.getElementById("commSprintCard"); if (sc) sc.style.display = "none";
     const vg = document.getElementById("viewGenai");
     if (vg) vg.style.display = "none";
     document.getElementById("viewQueue").style.display = "block";
@@ -2600,6 +3012,440 @@ async function boot() {
       <div class="help-tip" style="margin-top:8px;">请确认服务已启动，然后点右上角「🔄 刷新」。(${esc(err.message)})</div>
     </div>`;
   }
+}
+
+/* ====== Commercial 6-Account Sprint, Product Pool & 6-Slot Gacha Helpers ====== */
+function renderStandardStudioFilters(cachedCnt) {
+  const row = document.getElementById("studioFilterPills");
+  if (!row) return;
+  const defs = [
+    { id: "all", lbl: "📦 全部高佣" },
+    { id: "cached", lbl: `⚡ 已有实景秒出 (<span id="cachedCntPill">${Number(cachedCnt || 0)}</span>)` },
+    { id: "high_comm", lbl: "💎 高佣优选" },
+    { id: "paste", lbl: "🔗 粘库外新 PID" },
+  ];
+  row.innerHTML = defs.map(d => `<button type="button" class="f-pill ${CATALOG_FILTER === d.id ? "active" : ""}" data-cat-filter="${d.id}" onclick="setCatalogFilter('${d.id}')">${d.lbl}</button>`).join("");
+}
+
+function renderCommercialStudioFilters() {
+  const row = document.getElementById("studioFilterPills");
+  if (!row) return;
+  const defs = [
+    { id: "all", lbl: "📦 全部商单款" },
+    { id: "active", lbl: "🟢 已启用" },
+    { id: "prank", lbl: "🎭 整蛊" },
+    { id: "holiday_fandom", lbl: "🎄 绿毛/书粉" },
+    { id: "football", lbl: "🏈 橄榄球" },
+    { id: "cached", lbl: "⚡ 母图已就绪" },
+    { id: "paste", lbl: "➕ 临时贴新PID" },
+  ];
+  row.innerHTML = defs.map(d => `<button type="button" class="f-pill ${CATALOG_FILTER === d.id ? "active" : ""}" data-cat-filter="${d.id}" onclick="setCatalogFilter('${d.id}')">${d.lbl}</button>`).join("");
+}
+
+function stopCommPolling() {
+  if (COMM_POLL_TIMER) { clearTimeout(COMM_POLL_TIMER); COMM_POLL_TIMER = null; }
+}
+
+async function loadCommercialStatus(keepSelection = true) {
+  if (!isCommercialAccount() || !BASE_TUNNEL || !hasAnyAuth()) return;
+  try {
+    const resp = await fetch(apiUrl(`/api/commercial/status?acct=${encodeURIComponent(ACCT)}&t=${Date.now()}`), {
+      cache: "no-store", headers: authHeaders(),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) return;
+    COMM_STATUS = data;
+    renderCommercialSwitcher();
+    renderCommercialSprintCard();
+    renderCommercialProductPool();
+    const prods = Array.isArray(data.products) ? data.products : [];
+    if (!keepSelection || !COMM_SELECTED_PID || !prods.some(p => p.pid === COMM_SELECTED_PID)) {
+      const firstPref = prods.find(p => p.status === "active") || prods[0];
+      if (firstPref) COMM_SELECTED_PID = firstPref.pid;
+    }
+    if (COMM_SELECTED_PID && (ACTIVE_TAB === "commercial" || !COMM_MOTHER_DATA || COMM_MOTHER_DATA.pid !== COMM_SELECTED_PID)) {
+      loadMotherScenes(COMM_SELECTED_PID);
+    }
+  } catch (e) {}
+}
+
+function renderCommercialSwitcher() {
+  const bar = document.getElementById("commSwitcherBar");
+  if (!bar) return;
+  if (!isCommercialAccount()) { bar.style.display = "none"; return; }
+  bar.style.display = "flex";
+  const prog = (COMM_STATUS && COMM_STATUS.progress) || {};
+  const perAcct = {};
+  for (const r of (prog.per_account || [])) perAcct[String(r.account_key)] = r;
+  const ops = (COMM_STATUS && COMM_STATUS.project && Array.isArray(COMM_STATUS.project.operators))
+    ? COMM_STATUS.project.operators
+    : (AUTH_STATE.commercial_project && Array.isArray(AUTH_STATE.commercial_project.operators) ? AUTH_STATE.commercial_project.operators : [
+        { id: "A", name: "运营A", accounts: ["2", "13", "15"] },
+        { id: "B", name: "运营B", accounts: ["18", "21", "23"] },
+      ]);
+  bar.innerHTML = ops.map(op => {
+    const pills = (op.accounts || []).map(a => {
+      const aStr = String(a);
+      const info = perAcct[aStr] || {};
+      const pend = Number(info.pending_count || 0);
+      const actCls = (aStr === String(ACCT)) ? "active" : "";
+      return `<button type="button" class="comm-acct-pill ${actCls}" onclick="switchCommercialAccount('${esc(escJs(aStr))}')">
+        <span>${esc(aStr)}号</span>
+        ${pend > 0 ? `<span class="comm-acct-badge">待${pend}</span>` : `<span style="font-size:10px;opacity:0.7;">0</span>`}
+      </button>`;
+    }).join("");
+    return `<div class="comm-op-row"><span class="comm-op-lbl">${esc(op.name || op.id)}</span>${pills}</div>`;
+  }).join("");
+}
+
+function renderCommercialSprintCard() {
+  const box = document.getElementById("commSprintCard");
+  if (!box) return;
+  if (!isCommercialAccount() || !COMM_STATUS || !COMM_STATUS.progress) { box.style.display = "none"; return; }
+  const pr = COMM_STATUS.progress;
+  const me = (pr.per_account || []).find(x => String(x.account_key) === String(ACCT)) || {};
+  const opHtml = (pr.per_operator || []).map(op =>
+    `<span><b>${esc(op.name)}</b>(${esc((op.accounts || []).join("/"))}): 今日 <b>${Number(op.published_today || 0)}</b>/${Number(op.daily_target || 144)} · 累计 <b>${Number(op.published_total || 0)}</b></span>`
+  ).join("");
+  box.style.display = "block";
+  box.innerHTML = `
+    <div class="comm-sprint-top">
+      <div style="font-size:12.5px; font-weight:800; color:#f8fafc;">🚀 7天冲刺看板 · ${esc(pr.project_name || "潮链&拓飞 · 2000套")}</div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span style="font-size:11px; color:#6ee7b7; font-weight:700;">定向链接·免TSP</span>
+        <button type="button" class="hook-mini-btn" onclick="exportCommercialCsv()">📥 导出对账CSV</button>
+      </div>
+    </div>
+    <div class="comm-prog-track"><div class="comm-prog-fill" style="width:${Math.min(100, Number(pr.pct || 0))}%"></div></div>
+    <div class="comm-kpis">
+      <div class="comm-kpi"><div class="comm-kpi-num">${Number(pr.total_published || 0)} / ${Number(pr.target_total || 2000)}</div><div class="comm-kpi-lbl">总完成 (${Number(pr.pct || 0)}%)</div></div>
+      <div class="comm-kpi"><div class="comm-kpi-num">${Number(pr.today_published || 0)} / ${Number(pr.daily_target_total || 286)}</div><div class="comm-kpi-lbl">全队今日达标线</div></div>
+      <div class="comm-kpi"><div class="comm-kpi-num">${Number(me.published_today || 0)} / ${Number(me.daily_target || 48)}</div><div class="comm-kpi-lbl">本号(${esc(ACCT)}号)今日</div></div>
+      <div class="comm-kpi"><div class="comm-kpi-num">第${Number(pr.days_elapsed || 1)}天 (余${Number(pr.days_left || 7)}天)</div><div class="comm-kpi-lbl">品池启用 ${Number(pr.active_product_count || 0)}/${Number(pr.total_product_count || 0)}</div></div>
+    </div>
+    <div class="comm-ops-row">${opHtml}</div>
+  `;
+}
+
+function renderCommercialProductPool() {
+  const listEl = document.getElementById("commProdList");
+  const fltRow = document.getElementById("commProdFilterRow");
+  const statsEl = document.getElementById("commPoolStats");
+  if (!listEl || !COMM_STATUS) return;
+  const prods = Array.isArray(COMM_STATUS.products) ? COMM_STATUS.products : [];
+  if (statsEl) {
+    const actCnt = prods.filter(p => p.status === "active").length;
+    statsEl.textContent = `启用 ${actCnt} / 总计 ${prods.length} 款`;
+  }
+  if (fltRow) {
+    const defs = [
+      { id: "all", lbl: `全部(${prods.length})` },
+      { id: "active", lbl: `🟢 启用(${prods.filter(p => p.status === "active").length})` },
+      { id: "candidate", lbl: `🟡 候选(${prods.filter(p => p.status === "candidate").length})` },
+      { id: "prank", lbl: "🎭 整蛊" },
+      { id: "holiday_fandom", lbl: "🎄 绿毛/书粉" },
+      { id: "football", lbl: "🏈 橄榄球" },
+    ];
+    fltRow.innerHTML = defs.map(d => `<button type="button" class="f-pill ${COMM_PROD_FILTER === d.id ? "active" : ""}" onclick="COMM_PROD_FILTER='${d.id}'; renderCommercialProductPool();">${d.lbl}</button>`).join("");
+  }
+  const filtered = prods.filter(p => {
+    if (COMM_PROD_FILTER === "all") return true;
+    if (COMM_PROD_FILTER === "active" || COMM_PROD_FILTER === "candidate" || COMM_PROD_FILTER === "paused") return p.status === COMM_PROD_FILTER;
+    return p.cluster === COMM_PROD_FILTER;
+  });
+  if (!filtered.length) {
+    listEl.innerHTML = `<div style="padding:14px; text-align:center; color:#94a3b8; font-size:12.5px;">当前筛选下暂无商单产品</div>`;
+    return;
+  }
+  listEl.innerHTML = filtered.map(p => {
+    const pidJs = esc(escJs(p.pid));
+    const isSel = p.pid === COMM_SELECTED_PID;
+    const stTag = p.status === "active"
+      ? `<span class="tag tag-green">启用中</span>`
+      : (p.status === "paused" ? `<span class="tag" style="color:#fca5a5;">已暂停</span>` : `<span class="tag tag-amber">候选</span>`);
+    const nextSt = p.status === "active" ? "paused" : "active";
+    const nextLbl = p.status === "active" ? "暂停" : "启用";
+    return `<div class="comm-prod-row ${isSel ? "selected" : ""}" onclick="selectCommercialProduct('${pidJs}')">
+      <img src="${imgAuthUrl(p.thumb_url || `/api/product_thumb/${p.pid}`)}" loading="lazy" alt="${esc(p.cn_name)}">
+      <div style="flex:1; min-width:0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+          <div style="font-size:13px; font-weight:800; color:#f8fafc; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(p.cn_name)}</div>
+          ${stTag}
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin:2px 0 5px;">${esc(p.cluster_label || p.cluster)} · ${esc(p.shop_name || "商单店")} · ${esc(p.pid)}</div>
+        <div style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;" onclick="event.stopPropagation()">
+          <span class="c-badge cb-cached">母图 ${Number(p.ready_scene_count || 0)}张 · 锁 ${Number(p.approved_count || 0)}</span>
+          ${p.commission_desc ? `<span class="c-badge cb-pick">${esc(p.commission_desc)}</span>` : ""}
+          ${Number(p.real_shot_count || 0) > 0 ? `<span class="c-badge cb-cached">📸 实拍 ${Number(p.real_shot_count)}张</span>` : ""}
+          <span class="c-badge cb-pick">${p.target_url ? "🔗 定链已填" : "⚠️ 缺定链"}</span>
+          ${p.tap_qr_url ? `<button type="button" class="hook-mini-btn" onclick="openDirectImgLightbox('${esc(escJs(p.tap_qr_url))}','线下TAP二维码 · ${esc(escJs(p.cn_name || p.pid))}','扫码直接加高佣橱窗${p.commission_desc ? ` · ${esc(escJs(p.commission_desc))}` : ""}')">📷 TAP码</button>` : ""}
+          <button type="button" class="hook-mini-btn" onclick="selectCommercialProduct('${pidJs}')">🎲 抽卡审图</button>
+          <button type="button" class="hook-mini-btn" onclick="setCommercialProductStatus('${pidJs}','${nextSt}')">${nextLbl}</button>
+          <button type="button" class="hook-mini-btn" onclick="editCommercialTargetUrl('${pidJs}')">✏️ 定链</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function selectCommercialProduct(pid) {
+  COMM_SELECTED_PID = pid;
+  renderCommercialProductPool();
+  loadMotherScenes(pid);
+}
+
+async function loadMotherScenes(pid) {
+  if (!pid || !BASE_TUNNEL || !hasAnyAuth()) return;
+  stopCommPolling();
+  try {
+    const resp = await fetch(apiUrl(`/api/commercial/mother_scenes/${encodeURIComponent(pid)}?t=${Date.now()}`), {
+      cache: "no-store", headers: authHeaders(),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) return;
+    COMM_MOTHER_DATA = data;
+    renderCommercialMotherPanel();
+    if (data.job_status && data.job_status.status === "running") {
+      COMM_POLL_TIMER = setTimeout(() => loadMotherScenes(pid), 2500);
+    }
+  } catch (e) {}
+}
+
+function renderCommercialMotherPanel() {
+  const titleEl = document.getElementById("commMotherTitle");
+  const subEl = document.getElementById("commMotherSub");
+  const bodyEl = document.getElementById("commMotherBody");
+  if (!bodyEl || !COMM_MOTHER_DATA) return;
+  const d = COMM_MOTHER_DATA;
+  const p = d.product || {};
+  const cl = d.cluster || {};
+  const pidJs = esc(escJs(d.pid));
+  const jst = d.job_status || null;
+  if (titleEl) titleEl.textContent = `🎲 母图抽卡 · ${p.cn_name || d.pid}`;
+  if (subEl) subEl.textContent = `已出 ${Number(d.ready_count || 0)} 张 · 已锁定 ${Number(d.approved_count || 0)} 张`;
+
+  const refs = Array.isArray(d.ref_gallery_urls) ? d.ref_gallery_urls : [];
+  const refsHtml = refs.length
+    ? `<div style="font-size:11.5px; color:#94a3b8; margin-bottom:4px;">📌 官方参考真图（EchoTik / 商家上传 · 点击放大核对印花比例）：</div>
+       <div class="comm-ref-strip">${refs.map((u, i) => `<img src="${imgAuthUrl(u)}" onclick="openDirectImgLightbox('${esc(escJs(u))}','参考真图 #${i + 1}','${esc(escJs(p.cn_name || d.pid))}')" alt="参考${i + 1}">`).join("")}</div>`
+    : `<div class="help-tip" style="margin-bottom:8px;">⚠️ 暂无参考图：请在上方点「➕ 加品/改品」补传商家白底图或等待 EchoTik 自动拉图。</div>`;
+
+  const jobHtml = jst
+    ? `<div class="self-status" style="margin:6px 0 8px; ${jst.status === "error" ? "border-color:rgba(239,68,68,0.45);color:#fca5a5;" : ""}">${esc(jst.message || jst.status)} ${jst.finished_at ? `(${esc(jst.finished_at)})` : ""}</div>`
+    : "";
+
+  const slotsHtml = (d.slots || []).map(s => {
+    const idx = Number(s.slot_idx);
+    const cls = s.approved ? "is-approved" : (s.rejected ? "is-rejected" : "");
+    const statusPill = s.approved
+      ? `<span class="tag tag-green">✅ 已锁定</span>`
+      : (s.rejected ? `<span class="tag" style="color:#fca5a5;">❌ 已打回</span>` : (s.exists ? `<span class="tag tag-amber">待审核</span>` : `<span class="tag">空槽位</span>`));
+    const mediaHtml = s.exists
+      ? `<img class="comm-slot-img" src="${imgAuthUrl(s.img_url)}" onclick="openDirectImgLightbox('${esc(escJs(s.img_url))}','槽位${idx} · ${esc(escJs(s.slot_label))}','${esc(escJs(p.cn_name || d.pid))}')" alt="槽位${idx}">`
+      : `<div class="comm-slot-empty"><div style="font-size:20px;">🧩</div><div>槽位 ${idx} 空</div><div>${esc(s.slot_label)}</div></div>`;
+    return `<div class="comm-slot-card ${cls}">
+      ${mediaHtml}
+      <div class="comm-slot-body">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
+          <span style="font-size:11.5px; font-weight:800; color:#f8fafc;">#${idx} ${esc(s.slot_label)}</span>
+          ${statusPill}
+        </div>
+        <div style="font-size:10.5px; color:#94a3b8; line-height:1.3;">${esc(s.slot_brief)}</div>
+        <div class="comm-slot-acts">
+          <button type="button" class="hook-mini-btn" style="color:#6ee7b7;" onclick="commMotherAction('${pidJs}','approve',${idx})">✅ 合格锁定</button>
+          <button type="button" class="hook-mini-btn" style="color:#fca5a5;" onclick="commMotherAction('${pidJs}','reject',${idx})">❌ 打回</button>
+          <button type="button" class="hook-mini-btn" style="grid-column:1/-1;" onclick="commMotherAction('${pidJs}','reroll_slot',${idx})">🎲 API重抽第 ${idx} 张</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  bodyEl.innerHTML = `
+    ${cl.guard ? `<div class="comm-guard-strip">🛡️ <b>${esc(cl.label || "")} 合规铁律：</b>${esc(cl.guard)}</div>` : ""}
+    ${refsHtml}
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:4px 0 8px;">
+      <button type="button" class="btn btn-primary" style="flex:1; min-width:190px; margin-bottom:0;" onclick="commMotherAction('${pidJs}','generate_all',0)">✨ API 生成 3 张核心母图（NB 2.1 · 约 $0.11）</button>
+      <button type="button" class="btn btn-emerald" style="flex:1; min-width:190px; margin-bottom:0;" onclick="triggerCommercialBatch10('${pidJs}')">🚀 用已锁母图裂变 10 套 (2/3/4页混排→6号)</button>
+      <button type="button" class="hook-mini-btn" style="padding:10px 12px;" onclick="SELECTED_CAT_PID='${pidJs}'; switchMainTab('studio');">🎨 单套定制</button>
+    </div>
+    ${jobHtml}
+    <div class="comm-slot-grid">${slotsHtml}</div>
+  `;
+}
+
+async function commMotherAction(pid, action, slotIdx) {
+  if (action === "generate_all" && !confirm("确认调用 Gemini NB 2.1 生成当前商品的 3 张核心 AI 实景母图？（约 $0.11）")) return;
+  let customNote = "";
+  if (action === "reroll_slot") {
+    const ans = prompt(`重抽第 ${slotIdx} 槽位母图，可补充微调指令（留空则直接重抽，约 $0.067）：`, "");
+    if (ans === null) return;
+    customNote = ans.trim();
+  }
+  try {
+    const resp = await fetch(apiUrl("/api/commercial/mother_action"), {
+      method: "POST", headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ account_key: ACCT, pid, action, slot_idx: slotIdx, custom_note: customNote }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) { showToast("⚠️ " + (data.error || "操作失败"), "#ef4444"); return; }
+    if (data.started || data.already_running) {
+      showToast("⏳ 已提交后台重抽，自动刷新进度...");
+      loadMotherScenes(pid);
+    } else if (data.slots) {
+      COMM_MOTHER_DATA = data;
+      renderCommercialMotherPanel();
+      loadCommercialStatus(true);
+      showToast(action === "approve" ? `✅ 槽位 ${slotIdx} 已锁定` : `❌ 槽位 ${slotIdx} 已标红`);
+    }
+  } catch (e) { showToast("⚠️ 网络波动，请稍后重试", "#ef4444"); }
+}
+
+async function triggerCommercialBatch10(pid) {
+  if (!confirm("确认用当前已审母图 0 成本裂变 10 套（2/3/4页混排）并均匀分发到 6 台矩阵号吗？")) return;
+  try {
+    const resp = await fetch(apiUrl("/api/commercial/batch_10"), {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ pid, allow_real_discount: !!COMM_ALLOW_REAL_DISCOUNT }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) { showToast("⚠️ " + (data.error || "裂变提交失败"), "#ef4444"); return; }
+    showToast(data.already_running ? "⏳ 该款 10 套裂变任务已在运行中..." : "🚀 已提交 10 套 2/3/4页混排裂变，后台出片中...");
+    loadMotherScenes(pid);
+  } catch (e) { showToast("⚠️ 提交 10 套裂变失败", "#ef4444"); }
+}
+
+function toggleCommProdForm(forceOpen) {
+  const box = document.getElementById("commFormBox");
+  if (!box) return;
+  const open = (typeof forceOpen === "boolean") ? forceOpen : (box.style.display !== "block");
+  box.style.display = open ? "block" : "none";
+}
+
+async function handleCommFormFiles(evt) {
+  const files = Array.from((evt && evt.target && evt.target.files) || []).slice(0, 6);
+  COMM_FORM_REF_B64S = [];
+  for (const f of files) {
+    try {
+      const b64 = await new Promise((resolve, reject) => {
+        const rd = new FileReader();
+        rd.onload = () => resolve(String(rd.result || ""));
+        rd.onerror = reject;
+        rd.readAsDataURL(f);
+      });
+      if (b64) COMM_FORM_REF_B64S.push(b64);
+    } catch (e) {}
+  }
+  const cnt = document.getElementById("cfRefCount");
+  if (cnt) cnt.textContent = COMM_FORM_REF_B64S.length ? `已选 ${COMM_FORM_REF_B64S.length} 张本地图（将优先建档）` : "未选择本地图（默认自动走 EchoTik 拉图）";
+}
+
+async function submitCommercialProductForm() {
+  const pid = (document.getElementById("cfPid") || {}).value || "";
+  const cnName = (document.getElementById("cfCnName") || {}).value || "";
+  const shop = (document.getElementById("cfShop") || {}).value || "";
+  const cluster = (document.getElementById("cfCluster") || {}).value || "prank";
+  const status = (document.getElementById("cfStatus") || {}).value || "active";
+  const realPrice = (document.getElementById("cfRealPrice") || {}).value || "";
+  const origPrice = (document.getElementById("cfOrigPrice") || {}).value || "";
+  const targetUrl = (document.getElementById("cfTargetUrl") || {}).value || "";
+  if (!pid.trim()) { showToast("⚠️ 请填写商品 PID 或链接", "#f59e0b"); return; }
+
+  const btn = document.getElementById("cfSubmitBtn");
+  if (btn) btn.disabled = true;
+  try {
+    const resp = await fetch(apiUrl("/api/commercial/product_upsert"), {
+      method: "POST", headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({
+        pid, cn_name: cnName, shop_name: shop, cluster, status,
+        real_price: realPrice, original_price: origPrice, target_url: targetUrl,
+        ref_images_b64: COMM_FORM_REF_B64S, fetch_echotik: COMM_FORM_REF_B64S.length === 0,
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) { showToast("⚠️ " + (data.error || "保存失败"), "#ef4444"); return; }
+    COMM_FORM_REF_B64S = [];
+    if (document.getElementById("cfPid")) document.getElementById("cfPid").value = "";
+    if (document.getElementById("cfCnName")) document.getElementById("cfCnName").value = "";
+    if (document.getElementById("cfRefCount")) document.getElementById("cfRefCount").textContent = "未选择本地图（默认自动走 EchoTik 拉图）";
+    toggleCommProdForm(false);
+    COMM_SELECTED_PID = data.product.pid;
+    await loadCommercialStatus(true);
+    loadCatalog(true);
+    showToast(`✅ 已收录 ${data.product.cn_name}`);
+  } catch (e) { showToast("⚠️ 保存异常", "#ef4444"); }
+  finally { if (btn) btn.disabled = false; }
+}
+
+async function setCommercialProductStatus(pid, status) {
+  try {
+    const resp = await fetch(apiUrl("/api/commercial/product_status"), {
+      method: "POST", headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ pid, status }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) { showToast("⚠️ " + (data.error || "更新失败"), "#ef4444"); return; }
+    await loadCommercialStatus(true);
+    loadCatalog(true);
+    showToast(status === "active" ? "✅ 已启用该商单款" : "⏸️ 已暂停该商单款");
+  } catch (e) {}
+}
+
+async function editCommercialTargetUrl(pid) {
+  const prod = ((COMM_STATUS && COMM_STATUS.products) || []).find(x => x.pid === pid) || {};
+  const nextUrl = prompt(`填写/修改商品 ${prod.cn_name || pid} 的商家定向链接（6台矩阵账号共用）：`, prod.target_url || "");
+  if (nextUrl === null) return;
+  try {
+    const resp = await fetch(apiUrl("/api/commercial/product_upsert"), {
+      method: "POST", headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ pid, target_url: nextUrl.trim(), fetch_echotik: false }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) { showToast("⚠️ " + (data.error || "保存失败"), "#ef4444"); return; }
+    showToast("✅ 商家定向链接已更新，待发队列自动生效！");
+    await loadCommercialStatus(true);
+    boot();
+  } catch (e) { showToast("⚠️ 保存定向链接失败", "#ef4444"); }
+}
+
+function copyCommercialUrl(urlTxt) {
+  copyText(urlTxt, "商家定向链接");
+}
+
+async function exportCommercialCsv() {
+  try {
+    const resp = await fetch(apiUrl(`/api/commercial/export_csv?t=${Date.now()}`), { cache: "no-store", headers: authHeaders() });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const blob = await resp.blob();
+    _triggerBrowserDownload(blob, "chaolian_tuofei_reconciliation.csv");
+    showToast("📥 对账表 CSV 已导出！");
+  } catch (e) { showToast("⚠️ CSV 导出失败", "#ef4444"); }
+}
+
+async function promoteGenaiToMotherSlot(genaiAcct, filename) {
+  const prods = (COMM_STATUS && Array.isArray(COMM_STATUS.products)) ? COMM_STATUS.products : CATALOG_ITEMS;
+  const defPid = COMM_SELECTED_PID || (prods[0] && prods[0].pid) || "";
+  const hintList = (prods || []).slice(0, 6).map((p, i) => `${i + 1}. ${p.cn_name || p.pid} (${p.pid})`).join("\n");
+  const pidAns = prompt(`填写要填入的商单商品 PID（可直接确认当前默认 PID，或输入序号 1-6）：\n${hintList}`, defPid);
+  if (!pidAns) return;
+  let targetPid = pidAns.trim();
+  const idxNum = parseInt(targetPid, 10);
+  if (/^\d$/.test(targetPid) && idxNum >= 1 && idxNum <= (prods || []).length) targetPid = prods[idxNum - 1].pid;
+  const slotAns = prompt("填入第几个母图槽位？（输入 1–6，默认 1）\n1客厅圣诞树 2卧室对镜 3床面平铺 4派对POV 5拆箱 6俯拍", "1");
+  if (!slotAns) return;
+  const slotIdx = Math.max(1, Math.min(6, parseInt(slotAns, 10) || 1));
+  try {
+    const resp = await fetch(apiUrl("/api/commercial/mother_action"), {
+      method: "POST", headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ action: "promote_from_genai", account_key: ACCT, genai_account_key: genaiAcct, filename, pid: targetPid, slot_idx: slotIdx }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) { showToast("⚠️ " + (data.error || "写入失败"), "#ef4444"); return; }
+    COMM_SELECTED_PID = targetPid;
+    COMM_MOTHER_DATA = data;
+    showToast(`✅ 已填入 ${targetPid.slice(-6)} 第 ${slotIdx} 槽位并锁定！`);
+    loadCommercialStatus(true);
+  } catch (e) { showToast("⚠️ 写入槽位异常", "#ef4444"); }
 }
 
 boot();
