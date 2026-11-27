@@ -2032,6 +2032,8 @@ function renderCardHtml(it) {
   const isPreloaded = !!(preloadedFiles[key] && preloadedFiles[key].length);
   const isVideo = (it.media_type === "video" && !!it.video_name);
   const isNoCart = !!it.no_cart || isVideo;
+  const isDeAccount = /^de\d+/i.test(String(ACCT || "").trim()) || String(it.lang || "").toLowerCase() === "de";
+  const isPrebound = !!it.showcase_prebound;
   const comm = it.commercial || null;
   let linkSection = "";
   let commBadges = "";
@@ -2039,6 +2041,10 @@ function renderCardHtml(it) {
 
   if (isNoCart) {
     linkSection = `<div class="no-cart-banner">🎬 <b>无车日常空镜垫片 · 活跃养号（严禁挂小黄车）</b><br><span style="font-size:11.5px;font-weight:500;color:#cbd5e1;">直接存视频进系统相册 → TikTok 发短视频 → 留空 0 字正文 + 轻配热门音乐即可（每 4–5 条挂车图文插 1 条）。</span></div>`;
+  } else if (isPrebound) {
+    const preLbl = String(it.showcase_badge || "灵途 API 已预挂高佣橱窗 (collab=5 在库)").trim();
+    commBadges += `<span class="tag tag-green">✅ ${esc(preLbl)}</span>`;
+    linkSection = `<div class="zero-copy-hint" style="margin-bottom:9px;">✅ <b>${esc(preLbl)}</b><br><span style="font-size:11.5px;font-weight:500;color:#d1fae5;">该商品已通过灵途 API 锁定高佣入本号橱窗，进 TikTok 发帖时直接点「添加商品 → 橱窗」勾选即可，无需跳公开计划加车。</span></div>`;
   } else if (comm && comm.is_commercial) {
     if (comm.cluster_label) commBadges += `<span class="tag tag-pink">${esc(comm.cluster_label)}</span>`;
     if (comm.commission_desc) commBadges += `<span class="tag" style="background:rgba(245,158,11,0.18);color:#fde68a;border-color:rgba(245,158,11,0.4);">${esc(comm.commission_desc)}</span>`;
@@ -2132,7 +2138,7 @@ function renderCardHtml(it) {
   const countBadge = isVideo
     ? `<span class="tag tag-green">🎬 MP4${it.duration_sec ? ` ${esc(String(it.duration_sec))}s` : ''} (${(Number(it.video_size_kb || 0) / 1024).toFixed(1)}MB)</span>`
     : `<span class="tag tag-green">${esc(itemVariant(it).toUpperCase())} (${it.slide_names.length}张)</span>`;
-  const defectSection = isVideo ? "" : `
+  const defectSection = (isVideo || isDeAccount) ? "" : `
     <details class="defect-details">
       <summary><span>🔄 实景有瑕疵 / 想换套模板？</span><span style="font-size:11px; color:#64748b;">▾ 展开</span></summary>
       <div class="defect-acts">
