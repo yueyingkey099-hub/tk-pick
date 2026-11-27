@@ -552,6 +552,21 @@
   }
   .disclaimer-btns { display: grid; grid-template-columns: 1.35fr 1fr; gap: 7px; }
   .disclaimer-btns .btn { margin-bottom: 0; padding: 10px 10px; font-size: 13px; }
+  .tag-copy { cursor: pointer; user-select: all; }
+  .tag-copy:active { opacity: 0.78; transform: scale(0.98); }
+  .cart-prod-box {
+    background: #0b1120; border: 1px solid #334155; border-radius: 10px;
+    padding: 8px 10px; margin: -2px 0 10px; cursor: pointer;
+  }
+  .cart-prod-box:active { border-color: #60a5fa; background: #111b30; }
+  .cart-prod-hdr {
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    font-size: 11px; font-weight: 700; color: #93c5fd; margin-bottom: 3px;
+  }
+  .cart-prod-txt {
+    font-size: 12.5px; font-weight: 600; color: #f8fafc; line-height: 1.38;
+    word-break: break-word; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
 </style>
 </head>
 <body>
@@ -2236,21 +2251,25 @@ function renderCardHtml(it) {
     ? `<div class="help-tip" style="margin-bottom:10px;">🎬 <b>养号垫片节奏</b>：严禁挂小黄车，保持 0 字正文，轻配原声或舒缓热门音乐直接发。</div>`
     : `<div class="help-tip" style="margin-bottom:10px;">🎵 <b>防静音铁律</b>：进 TikTok 选好图后，<b>先挂橙色小黄车，最后再去顶部搜商用音乐</b>。</div>`;
 
+  const cartProdName = (!isNoCart && (it.product_name || "").trim()) ? String(it.product_name).trim() : "";
+  const cartProdBox = cartProdName
+    ? `<div class="cart-prod-box" onclick="copyItemField('${keyJs}', 'product_name', '加车产品名')">
+        <div class="cart-prod-hdr"><span>🛒 加车产品名（点击复制搜橱窗）</span><span>📋 复制</span></div>
+        <div class="cart-prod-txt">${esc(cartProdName)}</div>
+      </div>`
+    : "";
+
   return `<div class="card ${it.published ? 'is-done' : ''}" id="card-${esc(domId)}" data-item-key="${esc(key)}">
     <div class="prod-top">
       <div class="prod-name">${esc(it.cn_name)}</div>
       <button class="btn-del" onclick="reportAction('${keyJs}', 'dismiss')">移出 ×</button>
     </div>
     <div class="prod-meta">
-      <span class="tag">${isVideo ? 'ID' : 'PID'}: ${esc(it.pid)}</span>
-      ${countBadge}
-      ${isNoCart ? `<span class="tag tag-amber">🌿 无车养号</span>` : ''}
-      ${commBadges}
-      ${tplTag}
-      ${costTag}
-      ${it.queued_at ? `<span class="tag">派单 ${esc(it.queued_at)}</span>` : ''}
-      ${it.published ? `<span class="tag tag-green" data-pub-tag="1">✅ 本号已登记发帖</span>` : ''}
+      ${isNoCart
+        ? `<span class="tag">ID: ${esc(it.pid)}</span><span class="tag tag-amber">🌿 无车养号</span>`
+        : `<span class="tag tag-copy" onclick="copyText('${pidJsOnly}', 'PID')">PID: ${esc(it.pid)} 📋</span>`}
     </div>
+    ${cartProdBox}
     ${commGuardHtml}
     ${linkSection}
     ${mediaSection}
